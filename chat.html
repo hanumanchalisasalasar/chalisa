@@ -418,6 +418,24 @@
             z-index: 1000;
         }
         
+        .call-status {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 1001;
+            display: none;
+        }
+        
+        .call-status.show {
+            display: block;
+        }
+        
         @media (max-width: 768px) {
             .message {
                 max-width: 85%;
@@ -495,6 +513,10 @@
         </div>
     </div>
 
+    <div class="call-status" id="callStatus">
+        Connecting...
+    </div>
+
     <div class="notification" id="notification">
         <span class="notification-icon"></span>
         <span class="notification-message"></span>
@@ -530,6 +552,7 @@
             const notificationMessage = notification.querySelector('.notification-message');
             const typingIndicator = document.getElementById('typingIndicator');
             const debugInfo = document.getElementById('debugInfo');
+            const callStatus = document.getElementById('callStatus');
             
             // Debug function to log information
             function debug(message) {
@@ -564,9 +587,23 @@
             
             // Polling variables
             let lastMessageTimestamp = null;
-            let pollingInterval = null;
+            let messagePollingInterval = null;
             let typingTimeout = null;
             let isTyping = false;
+            
+            // WebRTC variables
+            let localStream = null;
+            let remoteStream = null;
+            let peerConnection = null;
+            let isCallInitiator = false;
+            let isCallActive = false;
+            
+            const configuration = {
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' }
+                ]
+            };
             
             // Show notification
             function showNotification(message, type = 'info') {
@@ -590,6 +627,17 @@
                 setTimeout(() => {
                     notification.classList.remove('show');
                 }, 3000);
+            }
+            
+            // Show call status
+            function showCallStatus(message) {
+                callStatus.textContent = message;
+                callStatus.classList.add('show');
+            }
+            
+            // Hide call status
+            function hideCallStatus() {
+                callStatus.classList.remove('show');
             }
             
             // Load messages from Supabase
@@ -619,7 +667,7 @@
                             lastMessageTimestamp = message.created_at;
                         });
                     } else if (!lastMessageTimestamp) {
-                        // Show welcome message only on initial load
+                        // Only show welcome message on first load if there are no messages
                         messagesContainer.innerHTML = '<div class="message received"><div class="message-content">Welcome to ChatConnect! Start a conversation.</div></div>';
                     }
                 } catch (err) {
@@ -690,7 +738,9 @@
                         return;
                     }
 
+                    // Clear input
                     messageInput.value = '';
+                    
                     // Immediately fetch new messages to show the sent message
                     loadMessages();
                     showNotification('Message sent', 'success');
@@ -752,14 +802,14 @@
             }
             
             // Setup polling for new messages
-            function setupPolling() {
+            function setupMessagePolling() {
                 // Clear any existing interval
-                if (pollingInterval) {
-                    clearInterval(pollingInterval);
+                if (messagePollingInterval) {
+                    clearInterval(messagePollingInterval);
                 }
                 
-                // Poll every 3 seconds
-                pollingInterval = setInterval(loadMessages, 3000);
+                // Poll every 2 seconds for faster response
+                messagePollingInterval = setInterval(loadMessages, 2000);
                 
                 // Initial load
                 loadMessages();
@@ -786,6 +836,272 @@
                 }, 3000);
             }
             
+            // WebRTC Functions
+            
+            // Create peer connection
+            function createPeerConnection() {
+                debug('Creating peer connection');
+                
+                peerConnection = new RTCPeerConnection(configuration);
+                
+                // Add local stream to peer connection
+                if (localStream) {
+                    localStream.getTracks().forEach(track => {
+                        peerConnection.addTrack(track, localStream);
+                    });
+                }
+                
+                // Setup event handlers for peer connection
+                peerConnection.ontrack = event => {
+                    debug('Received remote track');
+                    remoteStream = event.streams[0];
+                    remoteVideo.srcObject = remoteStream;
+                };
+                
+                peerConnection.onicecandidate = event => {
+                    if (event.candidate) {
+                        debug('Sending ICE candidate');
+                        sendSignalingMessage({
+                            type: 'ice-candidate',
+                            content: JSON.stringify(event.candidate)
+                        });
+                    }
+                };
+                
+                peerConnection.onconnectionstatechange = event => {
+                    debug('Connection state: ' + peerConnection.connectionState);
+                    
+                    if (peerConnection.connectionState === 'connected') {
+                        hideCallStatus();
+                        showNotification('Call connected', 'success');
+                    } else if (peerConnection.connectionState === 'disconnected' || 
+                              peerConnection.connectionState === 'failed' || 
+                              peerConnection.connectionState === 'closed') {
+                        endVideoCall();
+                    }
+                };
+            }
+            
+            // Send signaling message
+            async function sendSignalingMessage(message) {
+                try {
+                    debug('Sending signaling message: ' + message.type);
+                    
+                    const { data, error } = await supabase
+                        .from('signaling')
+                        .insert([
+                            {
+                                sender_id: userId,
+                                receiver_id: friendId,
+                                type: message.type,
+                                content: message.content
+                            }
+                        ]);
+
+                    if (error) {
+                        console.error('Error sending signaling message:', error);
+                        return;
+                    }
+                } catch (err) {
+                    console.error('Error in sendSignalingMessage:', err);
+                }
+            }
+            
+            // Load signaling messages
+            async function loadSignalingMessages() {
+                try {
+                    const { data, error } = await supabase
+                        .from('signaling')
+                        .select('*')
+                        .order('created_at', { ascending: true });
+
+                    if (error) {
+                        console.error('Error loading signaling messages:', error);
+                        return;
+                    }
+
+                    if (data && data.length > 0) {
+                        data.forEach(message => {
+                            handleSignalingMessage(message);
+                        });
+                    }
+                } catch (err) {
+                    console.error('Error in loadSignalingMessages:', err);
+                }
+            }
+            
+            // Handle signaling message
+            async function handleSignalingMessage(message) {
+                debug('Received signaling message: ' + message.type);
+                
+                try {
+                    switch (message.type) {
+                        case 'offer':
+                            if (!isCallInitiator && !isCallActive) {
+                                debug('Received offer, creating answer');
+                                isCallActive = true;
+                                
+                                if (!peerConnection) {
+                                    createPeerConnection();
+                                }
+                                
+                                const offer = JSON.parse(message.content);
+                                await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+                                
+                                const answer = await peerConnection.createAnswer();
+                                await peerConnection.setLocalDescription(answer);
+                                
+                                sendSignalingMessage({
+                                    type: 'answer',
+                                    content: JSON.stringify(answer)
+                                });
+                                
+                                showCallStatus('Answering call...');
+                                startVideoCallUI();
+                            }
+                            break;
+                            
+                        case 'answer':
+                            if (isCallInitiator && isCallActive) {
+                                debug('Received answer');
+                                const answer = JSON.parse(message.content);
+                                await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+                                showCallStatus('Call connecting...');
+                            }
+                            break;
+                            
+                        case 'ice-candidate':
+                            if (peerConnection) {
+                                debug('Received ICE candidate');
+                                const candidate = JSON.parse(message.content);
+                                await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+                            }
+                            break;
+                            
+                        case 'end-call':
+                            debug('Received end call signal');
+                            endVideoCall();
+                            break;
+                    }
+                } catch (err) {
+                    console.error('Error handling signaling message:', err);
+                }
+            }
+            
+            // Setup polling for signaling messages
+            function setupSignalingPolling() {
+                // Poll every 1 second for faster response
+                setInterval(loadSignalingMessages, 1000);
+            }
+            
+            // Start video call
+            async function startVideoCall() {
+                try {
+                    debug('Starting video call');
+                    
+                    if (isCallActive) {
+                        showNotification('Call already in progress', 'error');
+                        return;
+                    }
+                    
+                    isCallInitiator = true;
+                    isCallActive = true;
+                    
+                    // Get user media
+                    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                    localVideo.srcObject = localStream;
+                    
+                    // Create peer connection
+                    createPeerConnection();
+                    
+                    // Create offer
+                    const offer = await peerConnection.createOffer();
+                    await peerConnection.setLocalDescription(offer);
+                    
+                    // Send offer
+                    sendSignalingMessage({
+                        type: 'offer',
+                        content: JSON.stringify(offer)
+                    });
+                    
+                    showCallStatus('Calling...');
+                    startVideoCallUI();
+                    showNotification('Video call started', 'success');
+                } catch (error) {
+                    console.error('Error starting video call:', error);
+                    showNotification('Failed to start video call', 'error');
+                    endVideoCall();
+                }
+            }
+            
+            // Start video call UI
+            function startVideoCallUI() {
+                videoContainer.style.display = 'flex';
+            }
+            
+            // End video call
+            function endVideoCall() {
+                debug('Ending video call');
+                
+                // Send end call signal
+                if (isCallActive) {
+                    sendSignalingMessage({
+                        type: 'end-call',
+                        content: ''
+                    });
+                }
+                
+                // Close peer connection
+                if (peerConnection) {
+                    peerConnection.close();
+                    peerConnection = null;
+                }
+                
+                // Stop local stream
+                if (localStream) {
+                    localStream.getTracks().forEach(track => track.stop());
+                    localStream = null;
+                }
+                
+                // Reset remote stream
+                remoteStream = null;
+                remoteVideo.srcObject = null;
+                
+                // Reset call state
+                isCallInitiator = false;
+                isCallActive = false;
+                
+                // Hide video container
+                videoContainer.style.display = 'none';
+                hideCallStatus();
+                
+                showNotification('Video call ended', 'info');
+            }
+            
+            // Toggle audio track
+            function toggleAudioTrack() {
+                if (localStream) {
+                    const audioTrack = localStream.getAudioTracks()[0];
+                    if (audioTrack) {
+                        audioTrack.enabled = !audioTrack.enabled;
+                        toggleAudio.textContent = audioTrack.enabled ? '🎤' : '🔇';
+                        showNotification(audioTrack.enabled ? 'Audio enabled' : 'Audio disabled', 'info');
+                    }
+                }
+            }
+            
+            // Toggle video track
+            function toggleVideoTrack() {
+                if (localStream) {
+                    const videoTrack = localStream.getVideoTracks()[0];
+                    if (videoTrack) {
+                        videoTrack.enabled = !videoTrack.enabled;
+                        toggleVideo.textContent = videoTrack.enabled ? '📷' : '📵';
+                        showNotification(videoTrack.enabled ? 'Video enabled' : 'Video disabled', 'info');
+                    }
+                }
+            }
+            
             // File sharing
             function shareFile() {
                 debug('File button clicked');
@@ -802,15 +1118,6 @@
                 
                 // Clear file input
                 fileInput.value = '';
-            }
-            
-            // Video call
-            function startVideoCall() {
-                debug('Video button clicked');
-                showNotification('Video call feature would start here', 'info');
-                
-                // For demo purposes, we'll just show a notification
-                // In a real implementation, you would initialize WebRTC here
             }
             
             // Clear chat history
@@ -852,9 +1159,15 @@
             // Logout
             function logout() {
                 debug('Logout button clicked');
-                // Clear polling interval
-                if (pollingInterval) {
-                    clearInterval(pollingInterval);
+                
+                // Clear polling intervals
+                if (messagePollingInterval) {
+                    clearInterval(messagePollingInterval);
+                }
+                
+                // End any active call
+                if (isCallActive) {
+                    endVideoCall();
                 }
                 
                 localStorage.removeItem('userPin');
@@ -919,24 +1232,24 @@
             
             endVideoCall.addEventListener('click', () => {
                 debug('End video call button clicked');
-                videoContainer.style.display = 'none';
-                showNotification('Video call ended', 'info');
+                endVideoCall();
             });
             
             toggleAudio.addEventListener('click', () => {
                 debug('Toggle audio button clicked');
-                showNotification('Audio toggled', 'info');
+                toggleAudioTrack();
             });
             
             toggleVideo.addEventListener('click', () => {
                 debug('Toggle video button clicked');
-                showNotification('Video toggled', 'info');
+                toggleVideoTrack();
             });
             
             debug('Event listeners set up');
             
             // Initialize
-            setupPolling();
+            setupMessagePolling();
+            setupSignalingPolling();
             showNotification('Connected to chat', 'success');
         });
     </script>
