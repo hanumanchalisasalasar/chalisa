@@ -403,21 +403,6 @@
             display: block;
         }
         
-        .debug-info {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            background-color: rgba(0,0,0,0.7);
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 12px;
-            max-width: 300px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 1000;
-        }
-        
         .call-status {
             position: fixed;
             top: 80px;
@@ -522,10 +507,6 @@
         <span class="notification-message"></span>
     </div>
 
-    <div class="debug-info" id="debugInfo">
-        Debug info will appear here...
-    </div>
-
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -551,34 +532,18 @@
             const notificationIcon = notification.querySelector('.notification-icon');
             const notificationMessage = notification.querySelector('.notification-message');
             const typingIndicator = document.getElementById('typingIndicator');
-            const debugInfo = document.getElementById('debugInfo');
             const callStatus = document.getElementById('callStatus');
-            
-            // Debug function to log information
-            function debug(message) {
-                console.log(message);
-                debugInfo.innerHTML += '<br>' + message;
-            }
-            
-            debug('Chat page loaded');
             
             // User info
             const userPin = localStorage.getItem('userPin');
-            debug('Checking for user PIN in localStorage: ' + userPin);
             
             if (!userPin || (userPin !== '4505' && userPin !== '2678')) {
-                debug('No valid PIN found, redirecting to login page');
                 window.location.href = 'login.html';
                 return;
             }
             
-            debug('User authenticated with PIN: ' + userPin);
-            
             const userId = userPin === '4505' ? 'user1' : 'user2';
             const friendId = userPin === '4505' ? 'user2' : 'user1';
-            
-            debug('User ID: ' + userId);
-            debug('Friend ID: ' + friendId);
             
             // Initialize Supabase - Replace with your actual credentials
             const supabaseUrl = 'https://qzldhziicfiebvvdsckx.supabase.co';
@@ -588,6 +553,7 @@
             // Polling variables
             let lastMessageTimestamp = null;
             let messagePollingInterval = null;
+            let signalingPollingInterval = null;
             let typingTimeout = null;
             let isTyping = false;
             
@@ -718,8 +684,6 @@
                 const content = messageInput.value.trim();
                 if (!content) return;
                 
-                debug('Sending message: ' + content);
-                
                 try {
                     const { data, error } = await supabase
                         .from('messages')
@@ -819,8 +783,6 @@
             function handleTyping() {
                 if (!isTyping) {
                     isTyping = true;
-                    // In a real app, you would send a typing signal to the other user
-                    // For this demo, we'll just show the typing indicator locally
                     typingIndicator.classList.add('show');
                 }
                 
@@ -840,8 +802,6 @@
             
             // Create peer connection
             function createPeerConnection() {
-                debug('Creating peer connection');
-                
                 peerConnection = new RTCPeerConnection(configuration);
                 
                 // Add local stream to peer connection
@@ -853,14 +813,12 @@
                 
                 // Setup event handlers for peer connection
                 peerConnection.ontrack = event => {
-                    debug('Received remote track');
                     remoteStream = event.streams[0];
                     remoteVideo.srcObject = remoteStream;
                 };
                 
                 peerConnection.onicecandidate = event => {
                     if (event.candidate) {
-                        debug('Sending ICE candidate');
                         sendSignalingMessage({
                             type: 'ice-candidate',
                             content: JSON.stringify(event.candidate)
@@ -869,8 +827,6 @@
                 };
                 
                 peerConnection.onconnectionstatechange = event => {
-                    debug('Connection state: ' + peerConnection.connectionState);
-                    
                     if (peerConnection.connectionState === 'connected') {
                         hideCallStatus();
                         showNotification('Call connected', 'success');
@@ -885,8 +841,6 @@
             // Send signaling message
             async function sendSignalingMessage(message) {
                 try {
-                    debug('Sending signaling message: ' + message.type);
-                    
                     const { data, error } = await supabase
                         .from('signaling')
                         .insert([
@@ -932,13 +886,10 @@
             
             // Handle signaling message
             async function handleSignalingMessage(message) {
-                debug('Received signaling message: ' + message.type);
-                
                 try {
                     switch (message.type) {
                         case 'offer':
                             if (!isCallInitiator && !isCallActive) {
-                                debug('Received offer, creating answer');
                                 isCallActive = true;
                                 
                                 if (!peerConnection) {
@@ -963,7 +914,6 @@
                             
                         case 'answer':
                             if (isCallInitiator && isCallActive) {
-                                debug('Received answer');
                                 const answer = JSON.parse(message.content);
                                 await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
                                 showCallStatus('Call connecting...');
@@ -972,14 +922,12 @@
                             
                         case 'ice-candidate':
                             if (peerConnection) {
-                                debug('Received ICE candidate');
                                 const candidate = JSON.parse(message.content);
                                 await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
                             }
                             break;
                             
                         case 'end-call':
-                            debug('Received end call signal');
                             endVideoCall();
                             break;
                     }
@@ -991,14 +939,12 @@
             // Setup polling for signaling messages
             function setupSignalingPolling() {
                 // Poll every 1 second for faster response
-                setInterval(loadSignalingMessages, 1000);
+                signalingPollingInterval = setInterval(loadSignalingMessages, 1000);
             }
             
             // Start video call
             async function startVideoCall() {
                 try {
-                    debug('Starting video call');
-                    
                     if (isCallActive) {
                         showNotification('Call already in progress', 'error');
                         return;
@@ -1041,8 +987,6 @@
             
             // End video call
             function endVideoCall() {
-                debug('Ending video call');
-                
                 // Send end call signal
                 if (isCallActive) {
                     sendSignalingMessage({
@@ -1104,16 +1048,13 @@
             
             // File sharing
             function shareFile() {
-                debug('File button clicked');
                 fileInput.click();
             }
             
             function handleFileSelect(event) {
-                debug('File selected');
                 const file = event.target.files[0];
                 if (!file) return;
                 
-                debug('File name: ' + file.name);
                 sendFile(file);
                 
                 // Clear file input
@@ -1122,7 +1063,6 @@
             
             // Clear chat history
             function showClearModal() {
-                debug('Clear history button clicked');
                 clearModal.style.display = 'flex';
             }
             
@@ -1158,11 +1098,13 @@
             
             // Logout
             function logout() {
-                debug('Logout button clicked');
-                
                 // Clear polling intervals
                 if (messagePollingInterval) {
                     clearInterval(messagePollingInterval);
+                }
+                
+                if (signalingPollingInterval) {
+                    clearInterval(signalingPollingInterval);
                 }
                 
                 // End any active call
@@ -1175,16 +1117,10 @@
             }
             
             // Event listeners
-            debug('Setting up event listeners');
-            
-            sendButton.addEventListener('click', () => {
-                debug('Send button clicked');
-                sendMessage();
-            });
+            sendButton.addEventListener('click', sendMessage);
             
             messageInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
-                    debug('Enter key pressed');
                     sendMessage();
                 } else {
                     // Handle typing indicator
@@ -1195,57 +1131,25 @@
             // Handle typing indicator on input
             messageInput.addEventListener('input', handleTyping);
             
-            fileButton.addEventListener('click', () => {
-                debug('File button clicked');
-                shareFile();
-            });
+            fileButton.addEventListener('click', shareFile);
             
-            fileInput.addEventListener('change', (e) => {
-                debug('File input changed');
-                handleFileSelect(e);
-            });
+            fileInput.addEventListener('change', handleFileSelect);
             
-            videoButton.addEventListener('click', () => {
-                debug('Video button clicked');
-                startVideoCall();
-            });
+            videoButton.addEventListener('click', startVideoCall);
             
-            logoutButton.addEventListener('click', () => {
-                debug('Logout button clicked');
-                logout();
-            });
+            logoutButton.addEventListener('click', logout);
             
-            clearHistoryButton.addEventListener('click', () => {
-                debug('Clear history button clicked');
-                showClearModal();
-            });
+            clearHistoryButton.addEventListener('click', showClearModal);
             
-            cancelClear.addEventListener('click', () => {
-                debug('Cancel clear button clicked');
-                hideClearModal();
-            });
+            cancelClear.addEventListener('click', hideClearModal);
             
-            confirmClear.addEventListener('click', () => {
-                debug('Confirm clear button clicked');
-                clearChatHistory();
-            });
+            confirmClear.addEventListener('click', clearChatHistory);
             
-            endVideoCall.addEventListener('click', () => {
-                debug('End video call button clicked');
-                endVideoCall();
-            });
+            endVideoCall.addEventListener('click', endVideoCall);
             
-            toggleAudio.addEventListener('click', () => {
-                debug('Toggle audio button clicked');
-                toggleAudioTrack();
-            });
+            toggleAudio.addEventListener('click', toggleAudioTrack);
             
-            toggleVideo.addEventListener('click', () => {
-                debug('Toggle video button clicked');
-                toggleVideoTrack();
-            });
-            
-            debug('Event listeners set up');
+            toggleVideo.addEventListener('click', toggleVideoTrack);
             
             // Initialize
             setupMessagePolling();
