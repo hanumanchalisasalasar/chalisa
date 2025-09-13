@@ -119,6 +119,28 @@
             font-size: 16px;
         }
         
+        .message-file {
+            display: flex;
+            align-items: center;
+            margin-top: 8px;
+            padding: 8px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .message-file a {
+            color: var(--primary-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        
+        .message-file a:hover {
+            text-decoration: underline;
+        }
+        
         .input-container {
             display: flex;
             padding: 15px;
@@ -482,6 +504,7 @@
         Debug info will appear here...
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // DOM Elements
@@ -534,6 +557,17 @@
             debug('User ID: ' + userId);
             debug('Friend ID: ' + friendId);
             
+            // Initialize Supabase - Replace with your actual credentials
+            const supabaseUrl = 'https://qzldhziicfiebvvdsckx.supabase.co';
+            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6bGRoemlpY2ZpZWJ2dmRzY2t4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3NjA5NzgsImV4cCI6MjA3MzMzNjk3OH0.8ygX5w6lmgM9hQOVh42SBwrMa_69EmHWcQ_DfcaceX8';
+            const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+            
+            // Polling variables
+            let lastMessageTimestamp = null;
+            let pollingInterval = null;
+            let typingTimeout = null;
+            let isTyping = false;
+            
             // Show notification
             function showNotification(message, type = 'info') {
                 notificationMessage.textContent = message;
@@ -558,64 +592,198 @@
                 }, 3000);
             }
             
-            // Initialize messages
-            function initializeMessages() {
-                messagesContainer.innerHTML = '<div class="message received"><div class="message-content">Welcome to ChatConnect! Start a conversation.</div></div>';
-                debug('Messages initialized');
+            // Load messages from Supabase
+            async function loadMessages() {
+                try {
+                    let query = supabase
+                        .from('messages')
+                        .select('*')
+                        .order('created_at', { ascending: true });
+
+                    if (lastMessageTimestamp) {
+                        query = query.gt('created_at', lastMessageTimestamp);
+                    }
+
+                    const { data, error } = await query;
+
+                    if (error) {
+                        console.error('Error loading messages:', error);
+                        showNotification('Failed to load messages', 'error');
+                        return;
+                    }
+
+                    if (data && data.length > 0) {
+                        data.forEach(message => {
+                            displayMessage(message);
+                            // Update the last message timestamp
+                            lastMessageTimestamp = message.created_at;
+                        });
+                    } else if (!lastMessageTimestamp) {
+                        // Show welcome message only on initial load
+                        messagesContainer.innerHTML = '<div class="message received"><div class="message-content">Welcome to ChatConnect! Start a conversation.</div></div>';
+                    }
+                } catch (err) {
+                    console.error('Error in loadMessages:', err);
+                    showNotification('Failed to load messages', 'error');
+                }
             }
             
-            // Send message
-            function sendMessage() {
+            // Display message in the UI
+            function displayMessage(message) {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message');
+                messageElement.classList.add(message.sender_id === userId ? 'sent' : 'received');
+
+                const messageInfo = document.createElement('div');
+                messageInfo.classList.add('message-info');
+                const date = new Date(message.created_at);
+                messageInfo.textContent = `${message.sender_id === userId ? 'You' : 'Friend'} - ${date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+
+                const messageContent = document.createElement('div');
+                messageContent.classList.add('message-content');
+                
+                if (message.type === 'text') {
+                    messageContent.textContent = message.content;
+                } else if (message.type === 'file') {
+                    const fileContainer = document.createElement('div');
+                    fileContainer.classList.add('message-file');
+                    
+                    const fileLink = document.createElement('a');
+                    fileLink.href = message.content;
+                    fileLink.target = '_blank';
+                    fileLink.innerHTML = `📄 ${message.file_name}`;
+                    
+                    fileContainer.appendChild(fileLink);
+                    messageContent.appendChild(fileContainer);
+                }
+
+                messageElement.appendChild(messageInfo);
+                messageElement.appendChild(messageContent);
+                messagesContainer.appendChild(messageElement);
+
+                // Scroll to bottom
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+            
+            // Send message to Supabase
+            async function sendMessage() {
                 const content = messageInput.value.trim();
                 if (!content) return;
                 
                 debug('Sending message: ' + content);
                 
-                // Create message element
-                const messageElement = document.createElement('div');
-                messageElement.classList.add('message', 'sent');
+                try {
+                    const { data, error } = await supabase
+                        .from('messages')
+                        .insert([
+                            {
+                                sender_id: userId,
+                                receiver_id: friendId,
+                                content: content,
+                                type: 'text'
+                            }
+                        ]);
+
+                    if (error) {
+                        console.error('Error sending message:', error);
+                        showNotification('Failed to send message', 'error');
+                        return;
+                    }
+
+                    messageInput.value = '';
+                    // Immediately fetch new messages to show the sent message
+                    loadMessages();
+                    showNotification('Message sent', 'success');
+                } catch (err) {
+                    console.error('Error in sendMessage:', err);
+                    showNotification('Failed to send message', 'error');
+                }
+            }
+            
+            // Send file to Supabase
+            async function sendFile(file) {
+                try {
+                    // Check file size (limit to 10MB)
+                    if (file.size > 10 * 1024 * 1024) {
+                        showNotification('File size exceeds 10MB limit', 'error');
+                        return;
+                    }
+
+                    const fileName = `${Date.now()}_${file.name}`;
+                    const { data, error } = await supabase.storage
+                        .from('chat-files')
+                        .upload(fileName, file);
+
+                    if (error) {
+                        console.error('Error uploading file:', error);
+                        showNotification('Failed to upload file', 'error');
+                        return;
+                    }
+
+                    const { data: publicUrlData } = supabase.storage
+                        .from('chat-files')
+                        .getPublicUrl(fileName);
+
+                    const { error: messageError } = await supabase
+                        .from('messages')
+                        .insert([
+                            {
+                                sender_id: userId,
+                                receiver_id: friendId,
+                                content: publicUrlData.publicUrl,
+                                type: 'file',
+                                file_name: file.name
+                            }
+                        ]);
+
+                    if (messageError) {
+                        console.error('Error sending file message:', messageError);
+                        showNotification('Failed to share file', 'error');
+                        return;
+                    }
+
+                    // Immediately fetch new messages to show the sent file
+                    loadMessages();
+                    showNotification('File shared successfully', 'success');
+                } catch (err) {
+                    console.error('Error in sendFile:', err);
+                    showNotification('Failed to share file', 'error');
+                }
+            }
+            
+            // Setup polling for new messages
+            function setupPolling() {
+                // Clear any existing interval
+                if (pollingInterval) {
+                    clearInterval(pollingInterval);
+                }
                 
-                const messageInfo = document.createElement('div');
-                messageInfo.classList.add('message-info');
-                messageInfo.textContent = `You - ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+                // Poll every 3 seconds
+                pollingInterval = setInterval(loadMessages, 3000);
                 
-                const messageContent = document.createElement('div');
-                messageContent.classList.add('message-content');
-                messageContent.textContent = content;
+                // Initial load
+                loadMessages();
+            }
+            
+            // Handle typing indicator
+            function handleTyping() {
+                if (!isTyping) {
+                    isTyping = true;
+                    // In a real app, you would send a typing signal to the other user
+                    // For this demo, we'll just show the typing indicator locally
+                    typingIndicator.classList.add('show');
+                }
                 
-                messageElement.appendChild(messageInfo);
-                messageElement.appendChild(messageContent);
-                messagesContainer.appendChild(messageElement);
+                // Clear existing timeout
+                if (typingTimeout) {
+                    clearTimeout(typingTimeout);
+                }
                 
-                // Clear input
-                messageInput.value = '';
-                
-                // Scroll to bottom
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-                
-                // Show notification
-                showNotification('Message sent', 'success');
-                
-                // Simulate a reply after 1 second
-                setTimeout(() => {
-                    const replyElement = document.createElement('div');
-                    replyElement.classList.add('message', 'received');
-                    
-                    const replyInfo = document.createElement('div');
-                    replyInfo.classList.add('message-info');
-                    replyInfo.textContent = `Friend - ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
-                    
-                    const replyContent = document.createElement('div');
-                    replyContent.classList.add('message-content');
-                    replyContent.textContent = 'Thanks for your message! This is a simulated reply.';
-                    
-                    replyElement.appendChild(replyInfo);
-                    replyElement.appendChild(replyContent);
-                    messagesContainer.appendChild(replyElement);
-                    
-                    // Scroll to bottom
-                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-                }, 1000);
+                // Set timeout to hide typing indicator after 3 seconds of inactivity
+                typingTimeout = setTimeout(() => {
+                    isTyping = false;
+                    typingIndicator.classList.remove('show');
+                }, 3000);
             }
             
             // File sharing
@@ -630,28 +798,7 @@
                 if (!file) return;
                 
                 debug('File name: ' + file.name);
-                
-                // Create message element
-                const messageElement = document.createElement('div');
-                messageElement.classList.add('message', 'sent');
-                
-                const messageInfo = document.createElement('div');
-                messageInfo.classList.add('message-info');
-                messageInfo.textContent = `You - ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
-                
-                const messageContent = document.createElement('div');
-                messageContent.classList.add('message-content');
-                messageContent.textContent = 'Shared a file: ' + file.name;
-                
-                messageElement.appendChild(messageInfo);
-                messageElement.appendChild(messageContent);
-                messagesContainer.appendChild(messageElement);
-                
-                // Scroll to bottom
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-                
-                // Show notification
-                showNotification('File shared', 'success');
+                sendFile(file);
                 
                 // Clear file input
                 fileInput.value = '';
@@ -676,17 +823,40 @@
                 clearModal.style.display = 'none';
             }
             
-            function clearChatHistory() {
-                debug('Clearing chat history');
-                messagesContainer.innerHTML = '';
-                initializeMessages();
-                hideClearModal();
-                showNotification('Chat history cleared', 'success');
+            async function clearChatHistory() {
+                try {
+                    const { error } = await supabase
+                        .from('messages')
+                        .delete()
+                        .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`);
+
+                    if (error) {
+                        console.error('Error clearing chat history:', error);
+                        showNotification('Failed to clear chat history', 'error');
+                        return;
+                    }
+
+                    // Reset last message timestamp
+                    lastMessageTimestamp = null;
+                    
+                    // Reload messages
+                    loadMessages();
+                    hideClearModal();
+                    showNotification('Chat history cleared', 'success');
+                } catch (err) {
+                    console.error('Error in clearChatHistory:', err);
+                    showNotification('Failed to clear chat history', 'error');
+                }
             }
             
             // Logout
             function logout() {
                 debug('Logout button clicked');
+                // Clear polling interval
+                if (pollingInterval) {
+                    clearInterval(pollingInterval);
+                }
+                
                 localStorage.removeItem('userPin');
                 window.location.href = 'login.html';
             }
@@ -703,8 +873,14 @@
                 if (e.key === 'Enter') {
                     debug('Enter key pressed');
                     sendMessage();
+                } else {
+                    // Handle typing indicator
+                    handleTyping();
                 }
             });
+            
+            // Handle typing indicator on input
+            messageInput.addEventListener('input', handleTyping);
             
             fileButton.addEventListener('click', () => {
                 debug('File button clicked');
@@ -760,7 +936,7 @@
             debug('Event listeners set up');
             
             // Initialize
-            initializeMessages();
+            setupPolling();
             showNotification('Connected to chat', 'success');
         });
     </script>
