@@ -22,10 +22,10 @@
         html, body {
             height: 100%;
             overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             flex-direction: column;
             height: 100vh;
@@ -36,7 +36,7 @@
         .header {
             background-color: var(--primary-color);
             color: white;
-            padding: 12px 15px;
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -45,26 +45,22 @@
         }
         
         .header h1 {
-            font-size: 1.2rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            font-size: 1.5rem;
         }
         
         .header-buttons {
             display: flex;
-            gap: 8px;
+            gap: 10px;
         }
         
         .header button {
             background-color: rgba(255,255,255,0.2);
             color: white;
             border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
+            padding: 8px 15px;
+            border-radius: 5px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 0.85rem;
             transition: background-color 0.3s;
         }
         
@@ -77,23 +73,25 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            max-width: 1000px;
             width: 100%;
+            margin: 0 auto;
             background-color: white;
         }
         
         .messages-container {
             flex: 1;
             overflow-y: auto;
-            padding: 15px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
         }
         
         .message {
-            max-width: 80%;
-            padding: 10px 12px;
-            border-radius: 15px;
+            max-width: 70%;
+            padding: 12px 15px;
+            border-radius: 18px;
             position: relative;
             word-wrap: break-word;
             box-shadow: 0 1px 2px rgba(0,0,0,0.1);
@@ -102,32 +100,32 @@
         .message.sent {
             align-self: flex-end;
             background-color: var(--sent-message);
-            border-bottom-right-radius: 4px;
+            border-bottom-right-radius: 5px;
         }
         
         .message.received {
             align-self: flex-start;
             background-color: var(--received-message);
-            border-bottom-left-radius: 4px;
+            border-bottom-left-radius: 5px;
         }
         
         .message-info {
-            font-size: 11px;
+            font-size: 12px;
             color: #666;
-            margin-bottom: 4px;
+            margin-bottom: 5px;
         }
         
         .message-content {
-            font-size: 15px;
+            font-size: 16px;
         }
         
         .message-file {
             display: flex;
             align-items: center;
-            margin-top: 6px;
-            padding: 6px;
+            margin-top: 8px;
+            padding: 8px;
             background-color: #f8f9fa;
-            border-radius: 6px;
+            border-radius: 8px;
         }
         
         .message-file a {
@@ -135,9 +133,8 @@
             text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             font-weight: 500;
-            font-size: 14px;
         }
         
         .message-file a:hover {
@@ -146,21 +143,20 @@
         
         .input-container {
             display: flex;
-            padding: 12px;
+            padding: 15px;
             background-color: white;
             border-top: 1px solid #eee;
-            gap: 8px;
+            gap: 10px;
             z-index: 100;
-            align-items: center;
         }
         
         .message-input {
             flex: 1;
             border: 1px solid #ddd;
-            border-radius: 20px;
-            padding: 10px 15px;
+            border-radius: 25px;
+            padding: 12px 20px;
             outline: none;
-            font-size: 15px;
+            font-size: 16px;
             transition: border-color 0.3s;
         }
         
@@ -169,18 +165,17 @@
         }
         
         .action-button {
-            width: 40px;
-            height: 40px;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
             border: none;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 18px;
             transition: all 0.3s;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            flex-shrink: 0;
         }
         
         .send-button {
@@ -229,10 +224,10 @@
         
         .modal-content {
             background-color: white;
-            padding: 20px;
+            padding: 25px;
             border-radius: 10px;
             width: 90%;
-            max-width: 400px;
+            max-width: 500px;
             text-align: center;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
@@ -254,9 +249,9 @@
         }
         
         .modal-button {
-            padding: 8px 16px;
+            padding: 10px 20px;
             border: none;
-            border-radius: 4px;
+            border-radius: 5px;
             cursor: pointer;
             font-weight: bold;
             transition: background-color 0.3s;
@@ -293,7 +288,7 @@
         }
         
         .video-header {
-            padding: 12px;
+            padding: 15px;
             background-color: #333;
             color: white;
             display: flex;
@@ -320,30 +315,30 @@
         
         .video-label {
             position: absolute;
-            bottom: 10px;
-            left: 10px;
+            bottom: 15px;
+            left: 15px;
             background-color: rgba(0,0,0,0.5);
             color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 14px;
         }
         
         .video-controls {
             position: absolute;
-            bottom: 15px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 10px;
+            gap: 15px;
             background-color: rgba(0,0,0,0.5);
-            padding: 8px;
-            border-radius: 30px;
+            padding: 10px;
+            border-radius: 50px;
         }
         
         .video-control-button {
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             border: none;
             background-color: rgba(255,255,255,0.2);
@@ -352,7 +347,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 20px;
             transition: background-color 0.3s;
         }
         
@@ -362,19 +357,18 @@
         
         .notification {
             position: fixed;
-            top: 15px;
-            right: 15px;
+            top: 20px;
+            right: 20px;
             background-color: white;
-            padding: 12px 15px;
-            border-radius: 6px;
+            padding: 15px 20px;
+            border-radius: 8px;
             box-shadow: 0 3px 10px rgba(0,0,0,0.2);
             z-index: 1001;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             transform: translateX(120%);
             transition: transform 0.3s ease-out;
-            max-width: 80%;
         }
         
         .notification.show {
@@ -382,7 +376,7 @@
         }
         
         .notification-icon {
-            font-size: 18px;
+            font-size: 20px;
         }
         
         .notification.success .notification-icon {
@@ -399,26 +393,41 @@
         
         .typing-indicator {
             display: none;
-            padding: 6px 12px;
+            padding: 8px 15px;
             font-style: italic;
             color: #666;
-            font-size: 13px;
+            font-size: 14px;
         }
         
         .typing-indicator.show {
             display: block;
         }
         
+        .debug-info {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background-color: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            max-width: 300px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+        
         .call-status {
             position: fixed;
-            top: 70px;
+            top: 80px;
             left: 50%;
             transform: translateX(-50%);
             background-color: rgba(0,0,0,0.7);
             color: white;
-            padding: 8px 15px;
-            border-radius: 15px;
-            font-size: 13px;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
             z-index: 1001;
             display: none;
         }
@@ -428,70 +437,22 @@
         }
         
         @media (max-width: 768px) {
-            .header h1 {
-                font-size: 1rem;
-            }
-            
-            .header button {
-                padding: 5px 8px;
-                font-size: 0.8rem;
-            }
-            
             .message {
-                max-width: 90%;
-                padding: 8px 10px;
+                max-width: 85%;
             }
             
             .input-container {
                 padding: 10px;
-                gap: 6px;
-            }
-            
-            .message-input {
-                padding: 8px 12px;
-                font-size: 14px;
             }
             
             .action-button {
-                width: 36px;
-                height: 36px;
-                font-size: 14px;
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
             }
             
             .video-content {
                 flex-direction: column;
-            }
-            
-            .notification {
-                top: 10px;
-                right: 10px;
-                padding: 10px 12px;
-                max-width: 90%;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .header-buttons {
-                gap: 5px;
-            }
-            
-            .header button {
-                padding: 4px 6px;
-                font-size: 0.75rem;
-            }
-            
-            .messages-container {
-                padding: 10px;
-            }
-            
-            .input-container {
-                padding: 8px;
-            }
-            
-            .action-button {
-                width: 32px;
-                height: 32px;
-                font-size: 12px;
             }
         }
     </style>
@@ -561,6 +522,10 @@
         <span class="notification-message"></span>
     </div>
 
+    <div class="debug-info" id="debugInfo">
+        Debug info will appear here...
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -586,18 +551,34 @@
             const notificationIcon = notification.querySelector('.notification-icon');
             const notificationMessage = notification.querySelector('.notification-message');
             const typingIndicator = document.getElementById('typingIndicator');
+            const debugInfo = document.getElementById('debugInfo');
             const callStatus = document.getElementById('callStatus');
+            
+            // Debug function to log information
+            function debug(message) {
+                console.log(message);
+                debugInfo.innerHTML += '<br>' + message;
+            }
+            
+            debug('Chat page loaded');
             
             // User info
             const userPin = localStorage.getItem('userPin');
+            debug('Checking for user PIN in localStorage: ' + userPin);
             
             if (!userPin || (userPin !== '4505' && userPin !== '2678')) {
+                debug('No valid PIN found, redirecting to login page');
                 window.location.href = 'login.html';
                 return;
             }
             
+            debug('User authenticated with PIN: ' + userPin);
+            
             const userId = userPin === '4505' ? 'user1' : 'user2';
             const friendId = userPin === '4505' ? 'user2' : 'user1';
+            
+            debug('User ID: ' + userId);
+            debug('Friend ID: ' + friendId);
             
             // Initialize Supabase - Replace with your actual credentials
             const supabaseUrl = 'YOUR_SUPABASE_URL';
@@ -606,6 +587,7 @@
             
             // Polling variables
             let lastMessageTimestamp = null;
+            let lastSignalingTimestamp = null;
             let messagePollingInterval = null;
             let signalingPollingInterval = null;
             let typingTimeout = null;
@@ -687,7 +669,7 @@
                             lastMessageTimestamp = message.created_at;
                         });
                     } else if (!lastMessageTimestamp) {
-                        // Only show welcome message on first load if there are no messages
+                        // Show welcome message only on initial load
                         messagesContainer.innerHTML = '<div class="message received"><div class="message-content">Welcome to ChatConnect! Start a conversation.</div></div>';
                     }
                 } catch (err) {
@@ -738,6 +720,8 @@
                 const content = messageInput.value.trim();
                 if (!content) return;
                 
+                debug('Sending message: ' + content);
+                
                 try {
                     const { data, error } = await supabase
                         .from('messages')
@@ -756,9 +740,7 @@
                         return;
                     }
 
-                    // Clear input
                     messageInput.value = '';
-                    
                     // Immediately fetch new messages to show the sent message
                     loadMessages();
                     showNotification('Message sent', 'success');
@@ -826,8 +808,8 @@
                     clearInterval(messagePollingInterval);
                 }
                 
-                // Poll every 2 seconds for faster response
-                messagePollingInterval = setInterval(loadMessages, 2000);
+                // Poll every 3 seconds
+                messagePollingInterval = setInterval(loadMessages, 3000);
                 
                 // Initial load
                 loadMessages();
@@ -837,6 +819,8 @@
             function handleTyping() {
                 if (!isTyping) {
                     isTyping = true;
+                    // In a real app, you would send a typing signal to the other user
+                    // For this demo, we'll just show the typing indicator locally
                     typingIndicator.classList.add('show');
                 }
                 
@@ -856,6 +840,8 @@
             
             // Create peer connection
             function createPeerConnection() {
+                debug('Creating peer connection');
+                
                 peerConnection = new RTCPeerConnection(configuration);
                 
                 // Add local stream to peer connection
@@ -867,12 +853,14 @@
                 
                 // Setup event handlers for peer connection
                 peerConnection.ontrack = event => {
+                    debug('Received remote track');
                     remoteStream = event.streams[0];
                     remoteVideo.srcObject = remoteStream;
                 };
                 
                 peerConnection.onicecandidate = event => {
                     if (event.candidate) {
+                        debug('Sending ICE candidate');
                         sendSignalingMessage({
                             type: 'ice-candidate',
                             content: JSON.stringify(event.candidate)
@@ -881,6 +869,8 @@
                 };
                 
                 peerConnection.onconnectionstatechange = event => {
+                    debug('Connection state: ' + peerConnection.connectionState);
+                    
                     if (peerConnection.connectionState === 'connected') {
                         hideCallStatus();
                         showNotification('Call connected', 'success');
@@ -895,6 +885,8 @@
             // Send signaling message
             async function sendSignalingMessage(message) {
                 try {
+                    debug('Sending signaling message: ' + message.type);
+                    
                     const { data, error } = await supabase
                         .from('signaling')
                         .insert([
@@ -918,10 +910,16 @@
             // Load signaling messages
             async function loadSignalingMessages() {
                 try {
-                    const { data, error } = await supabase
+                    let query = supabase
                         .from('signaling')
                         .select('*')
                         .order('created_at', { ascending: true });
+
+                    if (lastSignalingTimestamp) {
+                        query = query.gt('created_at', lastSignalingTimestamp);
+                    }
+
+                    const { data, error } = await query;
 
                     if (error) {
                         console.error('Error loading signaling messages:', error);
@@ -931,6 +929,8 @@
                     if (data && data.length > 0) {
                         data.forEach(message => {
                             handleSignalingMessage(message);
+                            // Update the last signaling timestamp
+                            lastSignalingTimestamp = message.created_at;
                         });
                     }
                 } catch (err) {
@@ -940,10 +940,13 @@
             
             // Handle signaling message
             async function handleSignalingMessage(message) {
+                debug('Received signaling message: ' + message.type);
+                
                 try {
                     switch (message.type) {
                         case 'offer':
                             if (!isCallInitiator && !isCallActive) {
+                                debug('Received offer, creating answer');
                                 isCallActive = true;
                                 
                                 if (!peerConnection) {
@@ -968,6 +971,7 @@
                             
                         case 'answer':
                             if (isCallInitiator && isCallActive) {
+                                debug('Received answer');
                                 const answer = JSON.parse(message.content);
                                 await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
                                 showCallStatus('Call connecting...');
@@ -976,12 +980,14 @@
                             
                         case 'ice-candidate':
                             if (peerConnection) {
+                                debug('Received ICE candidate');
                                 const candidate = JSON.parse(message.content);
                                 await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
                             }
                             break;
                             
                         case 'end-call':
+                            debug('Received end call signal');
                             endVideoCall();
                             break;
                     }
@@ -992,13 +998,23 @@
             
             // Setup polling for signaling messages
             function setupSignalingPolling() {
+                // Clear any existing interval
+                if (signalingPollingInterval) {
+                    clearInterval(signalingPollingInterval);
+                }
+                
                 // Poll every 1 second for faster response
                 signalingPollingInterval = setInterval(loadSignalingMessages, 1000);
+                
+                // Initial load
+                loadSignalingMessages();
             }
             
             // Start video call
             async function startVideoCall() {
                 try {
+                    debug('Starting video call');
+                    
                     if (isCallActive) {
                         showNotification('Call already in progress', 'error');
                         return;
@@ -1041,6 +1057,8 @@
             
             // End video call
             function endVideoCall() {
+                debug('Ending video call');
+                
                 // Send end call signal
                 if (isCallActive) {
                     sendSignalingMessage({
@@ -1102,13 +1120,16 @@
             
             // File sharing
             function shareFile() {
+                debug('File button clicked');
                 fileInput.click();
             }
             
             function handleFileSelect(event) {
+                debug('File selected');
                 const file = event.target.files[0];
                 if (!file) return;
                 
+                debug('File name: ' + file.name);
                 sendFile(file);
                 
                 // Clear file input
@@ -1117,6 +1138,7 @@
             
             // Clear chat history
             function showClearModal() {
+                debug('Clear history button clicked');
                 clearModal.style.display = 'flex';
             }
             
@@ -1152,6 +1174,8 @@
             
             // Logout
             function logout() {
+                debug('Logout button clicked');
+                
                 // Clear polling intervals
                 if (messagePollingInterval) {
                     clearInterval(messagePollingInterval);
@@ -1170,13 +1194,17 @@
                 window.location.href = 'login.html';
             }
             
-            // Event listeners - Making sure all buttons work
-            sendButton.addEventListener('click', function() {
+            // Event listeners
+            debug('Setting up event listeners');
+            
+            sendButton.addEventListener('click', () => {
+                debug('Send button clicked');
                 sendMessage();
             });
             
-            messageInput.addEventListener('keypress', function(e) {
+            messageInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
+                    debug('Enter key pressed');
                     sendMessage();
                 } else {
                     // Handle typing indicator
@@ -1187,45 +1215,57 @@
             // Handle typing indicator on input
             messageInput.addEventListener('input', handleTyping);
             
-            fileButton.addEventListener('click', function() {
+            fileButton.addEventListener('click', () => {
+                debug('File button clicked');
                 shareFile();
             });
             
-            fileInput.addEventListener('change', function(e) {
+            fileInput.addEventListener('change', (e) => {
+                debug('File input changed');
                 handleFileSelect(e);
             });
             
-            videoButton.addEventListener('click', function() {
+            videoButton.addEventListener('click', () => {
+                debug('Video button clicked');
                 startVideoCall();
             });
             
-            logoutButton.addEventListener('click', function() {
+            logoutButton.addEventListener('click', () => {
+                debug('Logout button clicked');
                 logout();
             });
             
-            clearHistoryButton.addEventListener('click', function() {
+            clearHistoryButton.addEventListener('click', () => {
+                debug('Clear history button clicked');
                 showClearModal();
             });
             
-            cancelClear.addEventListener('click', function() {
+            cancelClear.addEventListener('click', () => {
+                debug('Cancel clear button clicked');
                 hideClearModal();
             });
             
-            confirmClear.addEventListener('click', function() {
+            confirmClear.addEventListener('click', () => {
+                debug('Confirm clear button clicked');
                 clearChatHistory();
             });
             
-            endVideoCall.addEventListener('click', function() {
+            endVideoCall.addEventListener('click', () => {
+                debug('End video call button clicked');
                 endVideoCall();
             });
             
-            toggleAudio.addEventListener('click', function() {
+            toggleAudio.addEventListener('click', () => {
+                debug('Toggle audio button clicked');
                 toggleAudioTrack();
             });
             
-            toggleVideo.addEventListener('click', function() {
+            toggleVideo.addEventListener('click', () => {
+                debug('Toggle video button clicked');
                 toggleVideoTrack();
             });
+            
+            debug('Event listeners set up');
             
             // Initialize
             setupMessagePolling();
