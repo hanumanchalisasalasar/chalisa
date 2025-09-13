@@ -734,27 +734,40 @@
             }
             
             // Send message to Supabase
-            async function sendMessage() {
-                const content = messageInput.value.trim();
-                if (!content) return;
-                
-                try {
-                    const { data, error } = await supabase
-                        .from('messages')
-                        .insert([
-                            {
-                                sender_id: userId,
-                                receiver_id: friendId,
-                                content: content,
-                                type: 'text'
-                            }
-                        ]);
+          async function sendMessage() {
+    console.log("sendMessage function called");
+    const content = messageInput.value.trim();
+    if (!content) return;
+    
+    try {
+        const { data, error } = await supabase
+            .from('messages')
+            .insert([
+                {
+                    sender_id: userId,
+                    receiver_id: friendId,
+                    content: content,
+                    type: 'text'
+                }
+            ]);
 
-                    if (error) {
-                        console.error('Error sending message:', error);
-                        showNotification('Failed to send message', 'error');
-                        return;
-                    }
+        if (error) {
+            console.error('Error sending message:', error);
+            showNotification('Failed to send message', 'error');
+            return;
+        }
+
+        // Clear input
+        messageInput.value = '';
+        
+        // Immediately fetch new messages to show the sent message
+        loadMessages();
+        showNotification('Message sent', 'success');
+    } catch (err) {
+        console.error('Error in sendMessage:', err);
+        showNotification('Failed to send message', 'error');
+    }
+}
 
                     // Clear input
                     messageInput.value = '';
@@ -1228,6 +1241,7 @@
             });
             
             // Initialize
+           console.log("Initializing application");
             setupMessagePolling();
             setupSignalingPolling();
             showNotification('Connected to chat', 'success');
@@ -1235,3 +1249,4 @@
     </script>
 </body>
 </html>
+
