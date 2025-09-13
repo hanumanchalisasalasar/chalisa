@@ -1170,10 +1170,12 @@
                 window.location.href = 'login.html';
             }
             
-            // Event listeners
-            sendButton.addEventListener('click', sendMessage);
+            // Event listeners - Making sure all buttons work
+            sendButton.addEventListener('click', function() {
+                sendMessage();
+            });
             
-            messageInput.addEventListener('keypress', (e) => {
+            messageInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     sendMessage();
                 } else {
@@ -1185,25 +1187,45 @@
             // Handle typing indicator on input
             messageInput.addEventListener('input', handleTyping);
             
-            fileButton.addEventListener('click', shareFile);
+            fileButton.addEventListener('click', function() {
+                shareFile();
+            });
             
-            fileInput.addEventListener('change', handleFileSelect);
+            fileInput.addEventListener('change', function(e) {
+                handleFileSelect(e);
+            });
             
-            videoButton.addEventListener('click', startVideoCall);
+            videoButton.addEventListener('click', function() {
+                startVideoCall();
+            });
             
-            logoutButton.addEventListener('click', logout);
+            logoutButton.addEventListener('click', function() {
+                logout();
+            });
             
-            clearHistoryButton.addEventListener('click', showClearModal);
+            clearHistoryButton.addEventListener('click', function() {
+                showClearModal();
+            });
             
-            cancelClear.addEventListener('click', hideClearModal);
+            cancelClear.addEventListener('click', function() {
+                hideClearModal();
+            });
             
-            confirmClear.addEventListener('click', clearChatHistory);
+            confirmClear.addEventListener('click', function() {
+                clearChatHistory();
+            });
             
-            endVideoCall.addEventListener('click', endVideoCall);
+            endVideoCall.addEventListener('click', function() {
+                endVideoCall();
+            });
             
-            toggleAudio.addEventListener('click', toggleAudioTrack);
+            toggleAudio.addEventListener('click', function() {
+                toggleAudioTrack();
+            });
             
-            toggleVideo.addEventListener('click', toggleVideoTrack);
+            toggleVideo.addEventListener('click', function() {
+                toggleVideoTrack();
+            });
             
             // Initialize
             setupMessagePolling();
