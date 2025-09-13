@@ -81,6 +81,14 @@
             font-size: 14px;
             color: #7f8c8d;
         }
+        .debug-info {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #999;
+            text-align: left;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -95,31 +103,49 @@
         <div class="user-hint">
             For testing: User 1 PIN: 4505, User 2 PIN: 2678
         </div>
+        <div class="debug-info" id="debugInfo">
+            Debug info will appear here...
+        </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const loginButton = document.getElementById('loginButton');
             const pinInput = document.getElementById('pin');
             const errorMessage = document.getElementById('errorMessage');
+            const debugInfo = document.getElementById('debugInfo');
             
-            // Initialize Supabase - Replace with your actual credentials
-            const supabaseUrl = 'https://qzldhziicfiebvvdsckx.supabase.coL';
-            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6bGRoemlpY2ZpZWJ2dmRzY2t4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3NjA5NzgsImV4cCI6MjA3MzMzNjk3OH0.8ygX5w6lmgM9hQOVh42SBwrMa_69EmHWcQ_DfcaceX8';
-            const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+            // Debug function to log information
+            function debug(message) {
+                console.log(message);
+                debugInfo.innerHTML += '<br>' + message;
+            }
             
-            loginButton.addEventListener('click', async () => {
+            debug('Login page loaded');
+            
+            // Check if we have a stored PIN
+            const storedPin = localStorage.getItem('userPin');
+            if (storedPin) {
+                debug('Found stored PIN: ' + storedPin);
+            } else {
+                debug('No stored PIN found');
+            }
+            
+            loginButton.addEventListener('click', () => {
                 const pin = pinInput.value.trim();
+                debug('Login button clicked with PIN: ' + pin);
                 
                 // Check if PIN is valid
                 if (pin === '4505' || pin === '2678') {
+                    debug('PIN is valid, storing in localStorage');
                     // Store user info in localStorage
                     localStorage.setItem('userPin', pin);
                     
+                    debug('Redirecting to chat.html');
                     // Redirect to chat page
                     window.location.href = 'chat.html';
                 } else {
+                    debug('Invalid PIN entered');
                     // Show error message
                     errorMessage.style.display = 'block';
                     // Hide error after 3 seconds
@@ -132,11 +158,11 @@
             // Allow pressing Enter to login
             pinInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
+                    debug('Enter key pressed');
                     loginButton.click();
                 }
             });
         });
     </script>
 </body>
-
 </html>
