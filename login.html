@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - ChatConnect</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f8ff;
+            color: #333;
+        }
+        .login-container {
+            width: 350px;
+            padding: 30px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .error-message {
+            color: #e74c3c;
+            margin-top: 15px;
+            text-align: center;
+            display: none;
+            padding: 10px;
+            background-color: #fadbd8;
+            border-radius: 5px;
+        }
+        .user-hint {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>Login to ChatConnect</h1>
+        <div class="form-group">
+            <label for="pin">Enter your PIN:</label>
+            <input type="password" id="pin" placeholder="Your access PIN" maxlength="4">
+        </div>
+        <button id="loginButton">Login</button>
+        <div class="error-message" id="errorMessage">Invalid PIN. Please try again.</div>
+        <div class="user-hint">
+            For testing: User 1 PIN: 4505, User 2 PIN: 2678
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginButton = document.getElementById('loginButton');
+            const pinInput = document.getElementById('pin');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            // Initialize Supabase - Replace with your actual credentials
+            const supabaseUrl = 'YOUR_SUPABASE_URL';
+            const supabaseKey = 'YOUR_SUPABASE_KEY';
+            const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+            
+            loginButton.addEventListener('click', async () => {
+                const pin = pinInput.value.trim();
+                
+                // Check if PIN is valid
+                if (pin === '4505' || pin === '2678') {
+                    // Store user info in localStorage
+                    localStorage.setItem('userPin', pin);
+                    
+                    // Redirect to chat page
+                    window.location.href = 'chat.html';
+                } else {
+                    // Show error message
+                    errorMessage.style.display = 'block';
+                    // Hide error after 3 seconds
+                    setTimeout(() => {
+                        errorMessage.style.display = 'none';
+                    }, 3000);
+                }
+            });
+            
+            // Allow pressing Enter to login
+            pinInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    loginButton.click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Chat App</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f8ff;
+            color: #333;
+        }
+        .container {
+            text-align: center;
+            max-width: 600px;
+            padding: 30px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        img {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        p {
+            margin-bottom: 25px;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+        button {
+            padding: 12px 25px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+        button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+        }
+        button:active {
+            transform: translateY(1px);
+        }
+        .counter {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #ecf0f1;
+            border-radius: 4px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+        .progress {
+            height: 100%;
+            background-color: #3498db;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to ChatConnect</h1>
+        <img src="https://picsum.photos/seed/chatapp/500/300.jpg" alt="Chat App Image">
+        <p>Experience seamless real-time communication with our simple yet powerful chat platform. Connect instantly, share files, and make video calls with your friends. Your privacy and security are our top priorities.</p>
+        <button id="goButton">Let's Start Chatting</button>
+        <div class="counter">Click to continue: <span id="clickCount">0</span>/5</div>
+        <div class="progress-bar">
+            <div class="progress" id="progressBar"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const goButton = document.getElementById('goButton');
+            const clickCountElement = document.getElementById('clickCount');
+            const progressBar = document.getElementById('progressBar');
+            let clickCount = 0;
+            
+            goButton.addEventListener('click', () => {
+                clickCount++;
+                clickCountElement.textContent = clickCount;
+                
+                // Update progress bar
+                const progressPercentage = (clickCount / 5) * 100;
+                progressBar.style.width = progressPercentage + '%';
+                
+                if (clickCount >= 5) {
+                    // Add a small delay for better UX
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 300);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
