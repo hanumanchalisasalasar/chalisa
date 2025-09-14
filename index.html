@@ -3,151 +3,1301 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to ChatConnect</title>
+    <title>Real-Time Chat App</title>
     <style>
-        body {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .screen {
+            display: none;
+            width: 100%;
+            max-width: 500px;
+            height: 100vh;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f8ff;
-            color: #333;
-            padding: 20px;
-            box-sizing: border-box;
+            height: 100%;
+            overflow-y: auto;
         }
-        .container {
-            text-align: center;
-            max-width: 600px;
-            width: 100%;
-            padding: 30px;
-            background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        img {
-            max-width: 100%;
+
+        .app-image {
+            width: 200px;
+            height: 200px;
             border-radius: 10px;
-            margin-bottom: 25px;
-            height: auto;
-        }
-        h1 {
-            color: #2c3e50;
             margin-bottom: 20px;
         }
+
         p {
-            margin-bottom: 25px;
-            line-height: 1.6;
-            font-size: 16px;
-            text-align: left;
+            text-align: center;
+            margin-bottom: 20px;
+            line-height: 1.5;
         }
-        button {
-            padding: 12px 25px;
-            background-color: #3498db;
+
+        .btn {
+            background-color: #128C7E;
             color: white;
             border: none;
-            border-radius: 30px;
+            padding: 10px 20px;
+            border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+            margin: 5px;
+            transition: background-color 0.3s;
         }
-        button:hover {
-            background-color: #2980b9;
-            transform: translateY(-2px);
-            box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+
+        .btn:hover {
+            background-color: #0d6b60;
         }
-        button:active {
-            transform: translateY(1px);
-        }
-        .counter {
-            margin-top: 15px;
+
+        #clickCounter {
+            margin-top: 10px;
             font-size: 14px;
-            color: #7f8c8d;
+            color: #666;
         }
-        .progress-bar {
+
+        /* Hanuman Chalisa Styling */
+        .hanuman-chalisa {
+            margin: 20px 0;
+            text-align: center;
+            font-family: 'Noto Sans Devanagari', 'Kailasa', 'Lohit Devanagari', sans-serif;
+            line-height: 1.8;
+            font-size: 16px;
             width: 100%;
-            height: 8px;
-            background-color: #ecf0f1;
-            border-radius: 4px;
-            margin-top: 15px;
-            overflow: hidden;
         }
-        .progress {
+
+        .hanuman-chalisa div {
+            margin-bottom: 10px;
+        }
+
+        .hanuman-chalisa strong {
+            color: #d32f2f;
+            font-weight: bold;
+        }
+
+        /* Login Screen */
+        .login-form {
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .user-option {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .user-btn {
+            background-color: #e0e0e0;
+            color: #333;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            flex: 1;
+            margin: 0 5px;
+        }
+
+        .user-btn:hover {
+            background-color: #d0d0d0;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .error {
+            color: #e74c3c;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        /* Chat Screen */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
             height: 100%;
-            background-color: #3498db;
-            width: 0%;
-            transition: width 0.3s ease;
         }
-        @media (max-width: 768px) {
-            .container {
-                padding: 20px;
-            }
-            h1 {
-                font-size: 1.5rem;
-            }
-            p {
-                font-size: 15px;
-            }
-            button {
-                padding: 10px 20px;
-                font-size: 15px;
-            }
+
+        .chat-header {
+            background-color: #128C7E;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        @media (max-width: 480px) {
-            .container {
-                padding: 15px;
-            }
-            h1 {
-                font-size: 1.3rem;
-            }
-            p {
-                font-size: 14px;
-            }
-            button {
-                padding: 8px 16px;
-                font-size: 14px;
-            }
+
+        .user-info {
+            font-size: 1px;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background-color: #e5ddd5;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            max-width: 70%;
+            padding: 10px;
+            border-radius: 10px;
+            word-wrap: break-word;
+        }
+
+        .message.sent {
+            background-color: #dcf8c6;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+
+        .message.received {
+            background-color: white;
+            align-self: flex-start;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            background-color: #f0f0f0;
+        }
+
+        #messageInput {
+            flex: 1;
+            margin-right: 10px;
+            margin-bottom: 0;
+        }
+
+        .chat-actions {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 10px;
+            background-color: #f0f0f0;
+            justify-content: center;
+        }
+
+        .chat-actions .btn {
+            background-color: #34B7F1;
+            margin: 5px;
+            font-size: 14px;
+            padding: 8px 15px;
+        }
+
+        .chat-actions .btn:hover {
+            background-color: #2a9fd4;
+        }
+
+        #clearHistoryBtn {
+            background-color: #e74c3c;
+        }
+
+        #clearHistoryBtn:hover {
+            background-color: #c0392b;
+        }
+
+        #logoutBtn {
+            background-color: #95a5a6;
+        }
+
+        #logoutBtn:hover {
+            background-color: #7f8c8d;
+        }
+
+        /* Video Call Screen */
+        .video-call-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .video-call-header {
+            background-color: #128C7E;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .video-container {
+            flex: 1;
+            background-color: #000;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #localVideo {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 150px;
+            height: 150px;
+            border-radius: 10px;
+            border: 2px solid #128C7E;
+            z-index: 10;
+            object-fit: cover;
+        }
+
+        #remoteVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .call-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .call-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+        }
+
+        .call-btn.end-call {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .call-btn.mute {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .call-btn.video-off {
+            background-color: #9b59b6;
+            color: white;
+        }
+
+        .call-status {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            z-index: 10;
+        }
+
+        /* Debug panel */
+        #debugPanel {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            max-width: 300px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        #debugToggle {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        /* Error message styling */
+        .db-error {
+            background-color: #ffebee;
+            color: #c62828;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        /* Video call notification */
+        .call-notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            z-index: 1000;
+            text-align: center;
+            max-width: 300px;
+        }
+
+        .call-notification h3 {
+            margin-bottom: 15px;
+            color: #128C7E;
+        }
+
+        .call-notification .btn {
+            margin: 5px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Welcome to ChatConnect</h1>
-        <img src="https://picsum.photos/seed/chatapp/500/300.jpg" alt="Chat App Image">
-        <p>Experience seamless real-time communication with our simple yet powerful chat platform. Connect instantly, share files, and make video calls with your friends. Your privacy and security are our top priorities.</p>
-        <button id="goButton">Let's Start Chatting</button>
-        <div class="counter">Click to continue: <span id="clickCount">0</span>/5</div>
-        <div class="progress-bar">
-            <div class="progress" id="progressBar"></div>
+    <!-- Debug Toggle Button -->
+    <button id="debugToggle">Debug</button>
+    
+    <!-- Debug Panel -->
+    <div id="debugPanel"></div>
+
+    <!-- Screen 1: Landing Page -->
+    <div id="screen1" class="screen active">
+        <div class="container">
+            <img src="https://assets.ganeshaspeaks.com/wp-content/uploads/2019/09/Lord-Hanuman-750.webp" alt="Chat App" class="app-image">
+            <p>जय श्री राम</p>
+            
+            <!-- Hanuman Chalisa -->
+            <div class="hanuman-chalisa">
+                <div>श्रीगुरु चरन सरोज रज, निज मनु मुकुरु सुधारि।</div>
+                <div>बरनऊं रघुबर बिमल जसु, जो दायकु फल चारि।।</div>
+                <div>बुद्धिहीन तनु जानिके, सुमिरौं पवन-कुमार।</div>
+                <div>बल बुद्धि बिद्या देहु मोहिं, हरहु कलेस बिकार।।</div>
+                <div><strong>चौपाई</strong></div>
+                <div>जय हनुमान ज्ञान गुन सागर।</div>
+                <div>जय कपीस तिहुं लोक उजागर।।</div>
+                <div>रामदूत अतुलित बल धामा।</div>
+                <div>अंजनि-पुत्र पवनसुत नामा।।</div>
+                <div>महाबीर बिक्रम बजरंगी।</div>
+                <div>कुमति निवार सुमति के संगी।।</div>
+                <div>कंचन बरन बिराज सुबेसा।</div>
+                <div>कानन कुंडल कुंचित केसा।।</div>
+                <div>हाथ बज्र औ ध्वजा बिराजै।</div>
+                <div>कांधे मूंज जनेऊ साजै।</div>
+                <div>संकर सुवन केसरीनंदन।</div>
+                <div>तेज प्रताप महा जग बन्दन।।</div>
+                <div>विद्यावान गुनी अति चातुर।</div>
+                <div>राम काज करिबे को आतुर।।</div>
+                <div>प्रभु चरित्र सुनिबे को रसिया।</div>
+                <div>राम लखन सीता मन बसिया।।</div>
+                <div>सूक्ष्म रूप धरि सियहिं दिखावा।</div>
+                <div>बिकट रूप धरि लंक जरावा।।</div>
+                <div>भीम रूप धरि असुर संहारे।</div>
+                <div>रामचंद्र के काज संवारे।।</div>
+                <div>लाय सजीवन लखन जियाये।</div>
+                <div>श्रीरघुबीर हरषि उर लाये।।</div>
+                <div>रघुपति कीन्ही बहुत बड़ाई।</div>
+                <div>तुम मम प्रिय भरतहि सम भाई।।</div>
+                <div>सहस बदन तुम्हरो जस गावैं।</div>
+                <div>अस कहि श्रीपति कंठ लगावैं।।</div>
+                <div>सनकादिक ब्रह्मादि मुनीसा।</div>
+                <div>नारद सारद सहित अहीसा।।</div>
+                <div>जम कुबेर दिगपाल जहां ते।</div>
+                <div>कबि कोबिद कहि सके कहां ते।।</div>
+                <div>तुम उपकार सुग्रीवहिं कीन्हा।</div>
+                <div>राम मिलाय राज पद दीन्हा।।</div>
+                <div>तुम्हरो मंत्र बिभीषन माना।</div>
+                <div>लंकेस्वर भए सब जग जाना।।</div>
+                <div>जुग सहस्र जोजन पर भानू।</div>
+                <div>लील्यो ताहि मधुर फल जानू।।</div>
+                <div>प्रभु मुद्रिका मेलि मुख माहीं।</div>
+                <div>जलधि लांघि गये अचरज नाहीं।।</div>
+                <div>दुर्गम काज जगत के जेते।</div>
+                <div>सुगम अनुग्रह तुम्हरे तेते।।</div>
+                <div>राम दुआरे तुम रखवारे।</div>
+                <div>होत न आज्ञा बिनु पैसारे।।</div>
+                <div>सब सुख लहै तुम्हारी सरना।</div>
+                <div>तुम रक्षक काहू को डर ना।।</div>
+                <div>आपन तेज सम्हारो आपै।</div>
+                <div>तीनों लोक हांक तें कांपै।।</div>
+                <div>भूत पिसाच निकट नहिं आवै।</div>
+                <div>महाबीर जब नाम सुनावै।।</div>
+                <div>नासै रोग हरै सब पीरा।</div>
+                <div>जपत निरंतर हनुमत बीरा।।</div>
+                <div>संकट तें हनुमान छुड़ावै।</div>
+                <div>मन क्रम बचन ध्यान जो लावै।।</div>
+                <div>सब पर राम तपस्वी राजा।</div>
+                <div>तिन के काज सकल तुम साजा।</div>
+                <div>और मनोरथ जो कोई लावै।</div>
+                <div>सोइ अमित जीवन फल पावै।।</div>
+                <div>चारों जुग परताप तुम्हारा।</div>
+                <div>है परसिद्ध जगत उजियारा।।</div>
+                <div>साधु-संत के तुम रखवारे।</div>
+                <div>असुर निकंदन राम दुलारे।।</div>
+                <div>अष्ट सिद्धि नौ निधि के दाता।</div>
+                <div>अस बर दीन जानकी माता।।</div>
+                <div>राम रसायन तुम्हरे पासा।</div>
+                <div>सदा रहो रघुपति के दासा।।</div>
+                <div>तुम्हरे भजन राम को पावै।</div>
+                <div>जनम-जनम के दुख बिसरावै।।</div>
+                <div>अन्तकाल रघुबर पुर जाई।</div>
+                <div>जहां जन्म हरि-भक्त कहाई।।</div>
+                <div>और देवता चित्त न धरई।</div>
+                <div>हनुमत सेइ सर्ब सुख करई।।</div>
+                <div>संकट कटै मिटै सब पीरा।</div>
+                <div>जो सुमिरै हनुमत बलबीरा।।</div>
+                <div>जै जै जै हनुमान गोसाईं।</div>
+                <div>कृपा करहु गुरुदेव की नाईं।।</div>
+                <div>जो सत बार पाठ कर कोई।</div>
+                <div>छूटहि बंदि महा सुख होई।।</div>
+                <div>जो यह पढ़ै हनुमान चालीसा।</div>
+                <div>होय सिद्धि साखी गौरीसा।।</div>
+                <div>तुलसीदास सदा हरि चेरा।</div>
+                <div>कीजै नाथ हृदय मंह डेरा।।</div>
+                <div><strong>दोहा :</strong></div>
+                <div><strong>पवन तनय संकट हरन, मंगल मूरति रूप।</strong></div>
+                <div><strong>राम लखन सीता सहित, हृदय बसहु सुर भूप।।</strong></div>
+            </div>
+            
+            <button id="goButton" class="btn">The End</button>
+            <div id="clickCounter"> </div>
         </div>
     </div>
 
+    <!-- Screen 2: Login -->
+    <div id="screen2" class="screen">
+        <div class="container">
+            <h2>Ram</h2>
+            <div class="login-form">
+                <div class="user-option">
+                   
+                </div>
+                <input type="password" id="pinInput" placeholder="Enter PIN" maxlength="4">
+                <button id="loginButton" class="btn">Login</button>
+                <div id="loginError" class="error"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen 3: Chat -->
+    <div id="screen3" class="screen">
+        <div class="chat-container">
+            <div class="chat-header">
+                <h2>Chat Room</h2>
+                <div class="user-info">Logged in as: <span id="currentUser"></span></div>
+            </div>
+            
+            <div id="messagesContainer" class="messages-container"></div>
+            
+            <div id="dbErrorContainer"></div>
+            
+            <div class="chat-input">
+                <input type="text" id="messageInput" placeholder="Type a message...">
+                <button id="sendButton" class="btn">Send</button>
+            </div>
+            
+            <div class="chat-actions">
+                <button id="fileShareBtn" class="btn">Share File</button>
+                <button id="videoCallBtn" class="btn">Video Call</button>
+                <button id="clearHistoryBtn" class="btn">Clear History</button>
+                <button id="logoutBtn" class="btn">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen 4: Video Call -->
+    <div id="screen4" class="screen">
+        <div class="video-call-container">
+            <div class="video-call-header">
+                <h2>Video Call</h2>
+                <div id="callStatus">Connecting...</div>
+            </div>
+            <div class="video-container">
+                <video id="remoteVideo" autoplay></video>
+                <video id="localVideo" autoplay muted></video>
+                <div class="call-status" id="callStatusDisplay">Connecting...</div>
+                <div class="call-controls">
+                    <button id="muteBtn" class="call-btn mute" title="Mute">🎤</button>
+                    <button id="videoBtn" class="call-btn video-off" title="Video Off">📹</button>
+                    <button id="endCallBtn" class="call-btn end-call" title="End Call">📞</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call Notification -->
+    <div id="callNotification" class="call-notification" style="display: none;">
+        <h3>Incoming Video Call</h3>
+        <p id="callerName">Someone is calling you</p>
+        <div>
+            <button id="acceptCallBtn" class="btn">Accept</button>
+            <button id="rejectCallBtn" class="btn">Reject</button>
+        </div>
+    </div>
+
+    <!-- File input (hidden) -->
+    <input type="file" id="fileInput" style="display: none;">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const goButton = document.getElementById('goButton');
-            const clickCountElement = document.getElementById('clickCount');
-            const progressBar = document.getElementById('progressBar');
-            let clickCount = 0;
+            // Debug panel functionality
+            const debugPanel = document.getElementById('debugPanel');
+            const debugToggle = document.getElementById('debugToggle');
+            const dbErrorContainer = document.getElementById('dbErrorContainer');
             
-            goButton.addEventListener('click', () => {
-                clickCount++;
-                clickCountElement.textContent = clickCount;
-                
-                // Update progress bar
-                const progressPercentage = (clickCount / 5) * 100;
-                progressBar.style.width = progressPercentage + '%';
-                
-                if (clickCount >= 5) {
-                    // Add a small delay for better UX
-                    setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 300);
+            debugToggle.addEventListener('click', () => {
+                if (debugPanel.style.display === 'block') {
+                    debugPanel.style.display = 'none';
+                } else {
+                    debugPanel.style.display = 'block';
                 }
             });
+            
+            function logDebug(message) {
+                console.log(message);
+                debugPanel.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${message}</div>`;
+                debugPanel.scrollTop = debugPanel.scrollHeight;
+            }
+            
+            function showDbError(message) {
+                dbErrorContainer.innerHTML = `<div class="db-error">${message}</div>`;
+                setTimeout(() => {
+                    dbErrorContainer.innerHTML = '';
+                }, 5000);
+            }
+            
+            // Initialize Supabase
+            const supabaseUrl = 'https://qzldhziicfiebvvdsckx.supabase.co';
+            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6bGRoemlpY2ZpZWJ2dmRzY2t4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3NjA5NzgsImV4cCI6MjA3MzMzNjk3OH0.8ygX5w6lmgM9hQOVh42SBwrMa_69EmHWcQ_DfcaceX8';
+            
+            logDebug('Initializing Supabase...');
+            
+            let supabase;
+            try {
+                supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+                logDebug('Supabase initialized successfully');
+            } catch (error) {
+                logDebug(`Error initializing Supabase: ${error.message}`);
+            }
+
+            // DOM Elements
+            const screen1 = document.getElementById('screen1');
+            const screen2 = document.getElementById('screen2');
+            const screen3 = document.getElementById('screen3');
+            const screen4 = document.getElementById('screen4');
+            const goButton = document.getElementById('goButton');
+            const clickCounter = document.getElementById('clickCounter');
+            const userButtons = document.querySelectorAll('.user-btn');
+            const pinInput = document.getElementById('pinInput');
+            const loginButton = document.getElementById('loginButton');
+            const loginError = document.getElementById('loginError');
+            const currentUserSpan = document.getElementById('currentUser');
+            const messagesContainer = document.getElementById('messagesContainer');
+            const messageInput = document.getElementById('messageInput');
+            const sendButton = document.getElementById('sendButton');
+            const fileShareBtn = document.getElementById('fileShareBtn');
+            const fileInput = document.getElementById('fileInput');
+            const videoCallBtn = document.getElementById('videoCallBtn');
+            const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            
+            // Video Call Elements
+            const callNotification = document.getElementById('callNotification');
+            const callerName = document.getElementById('callerName');
+            const acceptCallBtn = document.getElementById('acceptCallBtn');
+            const rejectCallBtn = document.getElementById('rejectCallBtn');
+            const remoteVideo = document.getElementById('remoteVideo');
+            const localVideo = document.getElementById('localVideo');
+            const callStatus = document.getElementById('callStatus');
+            const callStatusDisplay = document.getElementById('callStatusDisplay');
+            const muteBtn = document.getElementById('muteBtn');
+            const videoBtn = document.getElementById('videoBtn');
+            const endCallBtn = document.getElementById('endCallBtn');
+
+            // Check if all elements are found
+            const elementsFound = {
+                screen1: !!screen1,
+                screen2: !!screen2,
+                screen3: !!screen3,
+                screen4: !!screen4,
+                goButton: !!goButton,
+                clickCounter: !!clickCounter,
+                userButtons: userButtons.length,
+                pinInput: !!pinInput,
+                loginButton: !!loginButton,
+                loginError: !!loginError,
+                currentUserSpan: !!currentUserSpan,
+                messagesContainer: !!messagesContainer,
+                messageInput: !!messageInput,
+                sendButton: !!sendButton,
+                fileShareBtn: !!fileShareBtn,
+                fileInput: !!fileInput,
+                videoCallBtn: !!videoCallBtn,
+                clearHistoryBtn: !!clearHistoryBtn,
+                logoutBtn: !!logoutBtn,
+                callNotification: !!callNotification,
+                remoteVideo: !!remoteVideo,
+                localVideo: !!localVideo,
+                callStatus: !!callStatus,
+                callStatusDisplay: !!callStatusDisplay,
+                muteBtn: !!muteBtn,
+                videoBtn: !!videoBtn,
+                endCallBtn: !!endCallBtn
+            };
+            
+            logDebug('DOM Elements check:');
+            for (const [element, found] of Object.entries(elementsFound)) {
+                logDebug(`  ${element}: ${found ? 'Found' : 'NOT FOUND'}`);
+            }
+
+            // State
+            let clickCount = 0;
+            let currentUser = '';
+            let recipient = '';
+            let messagesSubscription = null;
+            let signalingSubscription = null;
+            
+            // WebRTC state
+            let localStream = null;
+            let remoteStream = null;
+            let peerConnection = null;
+            let isCallActive = false;
+            let isMuted = false;
+            let isVideoOff = false;
+            let isCaller = false;
+
+            // STUN/TURN servers
+            const iceServers = {
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' },
+                    { 
+                        urls: 'turn:openrelay.metered.ca:80',
+                        username: 'openrelayproject',
+                        credential: 'openrelayproject'
+                    },
+                    {
+                        urls: 'turn:openrelay.metered.ca:443',
+                        username: 'openrelayproject',
+                        credential: 'openrelayproject'
+                    }
+                ]
+            };
+
+            // Screen 1: Landing Page
+            if (goButton) {
+                goButton.addEventListener('click', () => {
+                    logDebug('Go button clicked');
+                    clickCount++;
+                    clickCounter.textContent = `Clicks: ${clickCount}/5`;
+                    
+                    if (clickCount >= 5) {
+                        logDebug('Moving to screen 2');
+                        screen1.classList.remove('active');
+                        screen2.classList.add('active');
+                    }
+                });
+            } else {
+                logDebug('ERROR: Go button not found');
+            }
+
+            // Screen 2: Login
+            if (userButtons.length > 0) {
+                userButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        logDebug(`User button clicked: ${button.dataset.pin}`);
+                        pinInput.value = button.dataset.pin;
+                    });
+                });
+            } else {
+                logDebug('ERROR: User buttons not found');
+            }
+
+            if (loginButton) {
+                loginButton.addEventListener('click', async () => {
+                    logDebug('Login button clicked');
+                    const pin = pinInput.value;
+                    
+                    if (pin === '4505') {
+                        currentUser = '4505';
+                        recipient = '2678';
+                        loginError.textContent = '';
+                        logDebug('Logging in as user 4505');
+                        await initializeChat();
+                    } else if (pin === '2678') {
+                        currentUser = '2678';
+                        recipient = '4505';
+                        loginError.textContent = '';
+                        logDebug('Logging in as user 2678');
+                        await initializeChat();
+                    } else {
+                        loginError.textContent = 'Invalid PIN. Please try again.';
+                        logDebug('Invalid PIN entered');
+                    }
+                });
+            } else {
+                logDebug('ERROR: Login button not found');
+            }
+
+            // Initialize Chat
+            async function initializeChat() {
+                logDebug('Initializing chat');
+                screen2.classList.remove('active');
+                screen3.classList.add('active');
+                currentUserSpan.textContent = currentUser;
+                
+                // Load existing messages
+                await loadMessages();
+                
+                // Set up real-time subscription for messages
+                try {
+                    messagesSubscription = supabase
+                        .from('messages')
+                        .on('INSERT', payload => {
+                            logDebug(`New message received: ${JSON.stringify(payload)}`);
+                            if (payload.new.sender === currentUser || payload.new.receiver === currentUser) {
+                                displayMessage(payload.new);
+                                
+                                // Check if it's a video call invitation
+                                if (payload.new.content.includes('Video call invitation')) {
+                                    showCallNotification();
+                                }
+                            }
+                        })
+                        .subscribe();
+                    logDebug('Real-time subscription set up for messages');
+                } catch (error) {
+                    logDebug(`Error setting up real-time subscription: ${error.message}`);
+                }
+                
+                // Set up real-time subscription for signaling
+                try {
+                    signalingSubscription = supabase
+                        .from('signaling')
+                        .on('INSERT', payload => {
+                            logDebug(`Signaling message received: ${JSON.stringify(payload)}`);
+                            if (payload.new.receiver === currentUser) {
+                                handleSignalingMessage(payload.new);
+                            }
+                        })
+                        .subscribe();
+                    logDebug('Real-time subscription set up for signaling');
+                } catch (error) {
+                    logDebug(`Error setting up signaling subscription: ${error.message}`);
+                }
+            }
+
+            // Load messages from database
+            async function loadMessages() {
+                try {
+                    logDebug('Loading messages');
+                    const { data, error } = await supabase
+                        .from('messages')
+                        .select('*')
+                        .or(`and(sender.eq.${currentUser},receiver.eq.${recipient}),and(sender.eq.${recipient},receiver.eq.${currentUser})`)
+                        .order('created_at', { ascending: true });
+                    
+                    if (error) {
+                        logDebug(`Error loading messages: ${error.message}`);
+                        return;
+                    }
+                    
+                    logDebug(`Messages loaded: ${data ? data.length : 0} messages`);
+                    messagesContainer.innerHTML = '';
+                    if (data) {
+                        data.forEach(message => {
+                            displayMessage(message);
+                        });
+                    }
+                } catch (error) {
+                    logDebug(`Error in loadMessages: ${error.message}`);
+                }
+            }
+
+            // Display a message
+            function displayMessage(message) {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message');
+                
+                if (message.sender === currentUser) {
+                    messageElement.classList.add('sent');
+                } else {
+                    messageElement.classList.add('received');
+                }
+                
+                messageElement.textContent = message.content;
+                messagesContainer.appendChild(messageElement);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+
+            // Send message
+            function sendMessage() {
+                logDebug('Send button clicked');
+                logDebug(`Current user: ${currentUser}`);
+                logDebug(`Recipient: ${recipient}`);
+                
+                if (!currentUser || !recipient) {
+                    logDebug('ERROR: User or recipient not set');
+                    return;
+                }
+                
+                const content = messageInput.value.trim();
+                if (!content) {
+                    logDebug('No content to send');
+                    return;
+                }
+                
+                logDebug(`Sending message: ${content}`);
+                
+                // Create a temporary message in the UI immediately
+                const tempMessage = {
+                    id: Date.now(), // Temporary ID
+                    sender: currentUser,
+                    receiver: recipient,
+                    content: content,
+                    created_at: new Date().toISOString()
+                };
+                displayMessage(tempMessage);
+                
+                // Clear the input field
+                messageInput.value = '';
+                
+                // Now send to database
+                supabase
+                    .from('messages')
+                    .insert([{ sender: currentUser, receiver: recipient, content }])
+                    .then(({ data, error }) => {
+                        if (error) {
+                            logDebug(`Error sending message: ${error.message}`);
+                            
+                            // Check if it's a schema error
+                            if (error.message.includes('column') && error.message.includes('does not exist')) {
+                                showDbError('Database table structure error. The "receiver" column is missing from the messages table. Please check your database setup.');
+                            }
+                            
+                            // Remove the temporary message if there was an error
+                            const messages = messagesContainer.querySelectorAll('.message');
+                            if (messages.length > 0) {
+                                messages[messages.length - 1].remove();
+                            }
+                            return;
+                        }
+                        logDebug(`Message sent successfully: ${JSON.stringify(data)}`);
+                    })
+                    .catch(error => {
+                        logDebug(`Error in sendMessage: ${error.message}`);
+                        
+                        // Check if it's a schema error
+                        if (error.message.includes('column') && error.message.includes('does not exist')) {
+                            showDbError('Database table structure error. The "receiver" column is missing from the messages table. Please check your database setup.');
+                        }
+                        
+                        // Remove the temporary message if there was an error
+                        const messages = messagesContainer.querySelectorAll('.message');
+                        if (messages.length > 0) {
+                            messages[messages.length - 1].remove();
+                        }
+                    });
+            }
+
+            // Add event listeners for send button and Enter key
+            if (sendButton) {
+                logDebug('Adding event listener to send button');
+                sendButton.addEventListener('click', sendMessage);
+            } else {
+                logDebug('ERROR: Send button not found');
+            }
+
+            if (messageInput) {
+                messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        sendMessage();
+                    }
+                });
+            } else {
+                logDebug('ERROR: Message input not found');
+            }
+
+            // File Share
+            if (fileShareBtn) {
+                fileShareBtn.addEventListener('click', () => {
+                    logDebug('File share button clicked');
+                    fileInput.click();
+                });
+            } else {
+                logDebug('ERROR: File share button not found');
+            }
+
+            if (fileInput) {
+                fileInput.addEventListener('change', async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    
+                    logDebug(`File selected: ${file.name}`);
+                    try {
+                        const { error } = await supabase
+                            .from('messages')
+                            .insert([{ 
+                                sender: currentUser, 
+                                receiver: recipient, 
+                                content: `Shared a file: ${file.name}` 
+                            }]);
+                        
+                        if (error) {
+                            logDebug(`Error sharing file: ${error.message}`);
+                            return;
+                        }
+                        
+                        logDebug('File shared successfully');
+                        fileInput.value = '';
+                    } catch (error) {
+                        logDebug(`Error in file share: ${error.message}`);
+                    }
+                });
+            } else {
+                logDebug('ERROR: File input not found');
+            }
+
+            // Video Call
+            if (videoCallBtn) {
+                videoCallBtn.addEventListener('click', async () => {
+                    logDebug('Video call button clicked');
+                    await startVideoCall();
+                });
+            } else {
+                logDebug('ERROR: Video call button not found');
+            }
+
+            // Start video call
+            async function startVideoCall() {
+                logDebug('Starting video call');
+                
+                // Send video call invitation
+                try {
+                    const { error } = await supabase
+                        .from('messages')
+                        .insert([{ 
+                            sender: currentUser, 
+                            receiver: recipient, 
+                            content: `Video call invitation from ${currentUser}` 
+                        }]);
+                    
+                    if (error) {
+                        logDebug(`Error sending video call invitation: ${error.message}`);
+                        return;
+                    }
+                    
+                    logDebug('Video call invitation sent');
+                    
+                    // Initialize the call
+                    await initializeCall(true);
+                } catch (error) {
+                    logDebug(`Error in startVideoCall: ${error.message}`);
+                }
+            }
+
+            // Initialize WebRTC call
+            async function initializeCall(caller = false) {
+                try {
+                    // Get user media
+                    localStream = await navigator.mediaDevices.getUserMedia({ 
+                        video: true, 
+                        audio: true 
+                    });
+                    
+                    // Display local video
+                    localVideo.srcObject = localStream;
+                    
+                    // Switch to video call screen
+                    screen3.classList.remove('active');
+                    screen4.classList.add('active');
+                    
+                    // Update call status
+                    callStatus.textContent = 'Connecting...';
+                    callStatusDisplay.textContent = 'Connecting...';
+                    isCallActive = true;
+                    isCaller = caller;
+                    
+                    // Create peer connection
+                    peerConnection = new RTCPeerConnection(iceServers);
+                    
+                    // Add local stream to peer connection
+                    localStream.getTracks().forEach(track => {
+                        peerConnection.addTrack(track, localStream);
+                    });
+                    
+                    // Listen for remote stream
+                    peerConnection.ontrack = event => {
+                        logDebug('Remote track received');
+                        remoteVideo.srcObject = event.streams[0];
+                        callStatus.textContent = 'Connected';
+                        callStatusDisplay.textContent = 'Connected';
+                    };
+                    
+                    // Listen for ICE candidates
+                    peerConnection.onicecandidate = event => {
+                        if (event.candidate) {
+                            logDebug('ICE candidate generated');
+                            sendSignalingMessage('ice-candidate', event.candidate);
+                        }
+                    };
+                    
+                    // Listen for connection state changes
+                    peerConnection.onconnectionstatechange = event => {
+                        logDebug(`Connection state: ${peerConnection.connectionState}`);
+                        callStatus.textContent = peerConnection.connectionState.charAt(0).toUpperCase() + peerConnection.connectionState.slice(1);
+                        callStatusDisplay.textContent = peerConnection.connectionState.charAt(0).toUpperCase() + peerConnection.connectionState.slice(1);
+                    };
+                    
+                    // If this is the caller, create an offer
+                    if (isCaller) {
+                        logDebug('Creating offer');
+                        const offer = await peerConnection.createOffer();
+                        await peerConnection.setLocalDescription(offer);
+                        sendSignalingMessage('offer', offer);
+                    }
+                    
+                    logDebug('Call initialized');
+                } catch (error) {
+                    logDebug(`Error initializing call: ${error.message}`);
+                    endCall();
+                }
+            }
+
+            // Send signaling message
+            async function sendSignalingMessage(type, data) {
+                try {
+                    const { error } = await supabase
+                        .from('signaling')
+                        .insert([{ 
+                            sender: currentUser, 
+                            receiver: recipient, 
+                            type, 
+                            data 
+                        }]);
+                    
+                    if (error) {
+                        logDebug(`Error sending signaling message: ${error.message}`);
+                    }
+                } catch (error) {
+                    logDebug(`Error in sendSignalingMessage: ${error.message}`);
+                }
+            }
+
+            // Handle signaling message
+            async function handleSignalingMessage(message) {
+                const { type, data } = message;
+                
+                try {
+                    if (type === 'offer') {
+                        logDebug('Received offer');
+                        if (!peerConnection) {
+                            await initializeCall(false);
+                        }
+                        await peerConnection.setRemoteDescription(new RTCSessionDescription(data));
+                        const answer = await peerConnection.createAnswer();
+                        await peerConnection.setLocalDescription(answer);
+                        sendSignalingMessage('answer', answer);
+                    } else if (type === 'answer') {
+                        logDebug('Received answer');
+                        await peerConnection.setRemoteDescription(new RTCSessionDescription(data));
+                    } else if (type === 'ice-candidate') {
+                        logDebug('Received ICE candidate');
+                        await peerConnection.addIceCandidate(new RTCIceCandidate(data));
+                    }
+                } catch (error) {
+                    logDebug(`Error handling signaling message: ${error.message}`);
+                }
+            }
+
+            // Show call notification
+            function showCallNotification() {
+                logDebug('Showing call notification');
+                callerName.textContent = `${recipient} is calling you`;
+                callNotification.style.display = 'block';
+            }
+
+            // Accept call
+            if (acceptCallBtn) {
+                acceptCallBtn.addEventListener('click', async () => {
+                    logDebug('Call accepted');
+                    callNotification.style.display = 'none';
+                    await initializeCall(false);
+                });
+            }
+
+            // Reject call
+            if (rejectCallBtn) {
+                rejectCallBtn.addEventListener('click', () => {
+                    logDebug('Call rejected');
+                    callNotification.style.display = 'none';
+                });
+            }
+
+            // Mute/Unmute
+            if (muteBtn) {
+                muteBtn.addEventListener('click', () => {
+                    if (localStream) {
+                        isMuted = !isMuted;
+                        localStream.getAudioTracks().forEach(track => {
+                            track.enabled = !isMuted;
+                        });
+                        muteBtn.textContent = isMuted ? '🔇' : '🎤';
+                        logDebug(`Audio ${isMuted ? 'muted' : 'unmuted'}`);
+                    }
+                });
+            }
+
+            // Video On/Off
+            if (videoBtn) {
+                videoBtn.addEventListener('click', () => {
+                    if (localStream) {
+                        isVideoOff = !isVideoOff;
+                        localStream.getVideoTracks().forEach(track => {
+                            track.enabled = !isVideoOff;
+                        });
+                        videoBtn.textContent = isVideoOff ? '📷' : '📹';
+                        logDebug(`Video ${isVideoOff ? 'off' : 'on'}`);
+                    }
+                });
+            }
+
+            // End call
+            function endCall() {
+                logDebug('Ending call');
+                
+                // Stop local stream
+                if (localStream) {
+                    localStream.getTracks().forEach(track => {
+                        track.stop();
+                    });
+                    localStream = null;
+                }
+                
+                // Clear video elements
+                localVideo.srcObject = null;
+                remoteVideo.srcObject = null;
+                
+                // Close peer connection
+                if (peerConnection) {
+                    peerConnection.close();
+                    peerConnection = null;
+                }
+                
+                // Reset call state
+                isCallActive = false;
+                isMuted = false;
+                isVideoOff = false;
+                isCaller = false;
+                
+                // Switch back to chat screen
+                screen4.classList.remove('active');
+                screen3.classList.add('active');
+                
+                // Reset button icons
+                muteBtn.textContent = '🎤';
+                videoBtn.textContent = '📹';
+            }
+
+            // End call button
+            if (endCallBtn) {
+                endCallBtn.addEventListener('click', () => {
+                    endCall();
+                });
+            }
+
+            // Clear History
+            if (clearHistoryBtn) {
+                clearHistoryBtn.addEventListener('click', async () => {
+                    logDebug('Clear history button clicked');
+                    if (confirm('Are you sure you want to clear all chat history?')) {
+                        try {
+                            const { error } = await supabase
+                                .from('messages')
+                                .delete()
+                                .or(`and(sender.eq.${currentUser},receiver.eq.${recipient}),and(sender.eq.${recipient},receiver.eq.${currentUser})`);
+                            
+                            if (error) {
+                                logDebug(`Error clearing history: ${error.message}`);
+                                return;
+                            }
+                            
+                            logDebug('History cleared successfully');
+                            messagesContainer.innerHTML = '';
+                        } catch (error) {
+                            logDebug(`Error in clear history: ${error.message}`);
+                        }
+                    }
+                });
+            } else {
+                logDebug('ERROR: Clear history button not found');
+            }
+
+            // Logout
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => {
+                    logDebug('Logout button clicked');
+                    
+                    // End any active call
+                    if (isCallActive) {
+                        endCall();
+                    }
+                    
+                    if (messagesSubscription) {
+                        supabase.removeSubscription(messagesSubscription);
+                    }
+                    
+                    if (signalingSubscription) {
+                        supabase.removeSubscription(signalingSubscription);
+                    }
+                    
+                    screen3.classList.remove('active');
+                    screen2.classList.add('active');
+                    currentUser = '';
+                    recipient = '';
+                    pinInput.value = '';
+                });
+            } else {
+                logDebug('ERROR: Logout button not found');
+            }
         });
     </script>
 </body>
