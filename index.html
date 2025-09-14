@@ -73,10 +73,9 @@
             background-color: #0d6b60;
         }
 
+        /* Hide click counter */
         #clickCounter {
-            margin-top: 10px;
-            font-size: 14px;
-            color: #666;
+            display: none;
         }
 
         /* Hanuman Chalisa Styling */
@@ -376,7 +375,7 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(0,0,0,0.3);
-            z-index: 9999; /* Very high z-index to ensure it's on top */
+            z-index: 99999; /* Very high z-index to ensure it's on top */
             text-align: center;
             max-width: 300px;
             display: none; /* Hidden by default */
@@ -555,8 +554,8 @@
             <h2>Login</h2>
             <div class="login-form">
                 <div class="user-option">
-                    <button class="user-btn" data-pin="4505">Me (4505)</button>
-                    <button class="user-btn" data-pin="2678">Friend (2678)</button>
+                    <button class="user-btn" data-pin="4505">Me</button>
+                    <button class="user-btn" data-pin="2678">Friend</button>
                 </div>
                 <input type="password" id="pinInput" placeholder="Enter PIN" maxlength="4">
                 <button id="loginButton" class="btn">Login</button>
@@ -837,7 +836,10 @@
                 logDebug('Initializing chat');
                 screen2.classList.remove('active');
                 screen3.classList.add('active');
-                currentUserSpan.textContent = currentUser;
+                
+                // Display user as M or D
+                const displayName = currentUser === '4505' ? 'M' : 'D';
+                currentUserSpan.textContent = displayName;
                 
                 // Load existing messages
                 await loadMessages();
@@ -1211,11 +1213,14 @@
                 // Show incoming call indicator in chat header
                 incomingCallIndicator.style.display = 'inline-block';
                 
-                // Set caller name
-                callerName.textContent = `${recipient} is calling you`;
+                // Set caller name (show as M or D)
+                const callerDisplayName = recipient === '4505' ? 'M' : 'D';
+                callerName.textContent = `${callerDisplayName} is calling you`;
                 
                 // Show notification
                 callNotification.style.display = 'block';
+                callNotification.style.visibility = 'visible';
+                callNotification.style.opacity = '1';
                 
                 // Play notification sound (if available)
                 playNotificationSound();
@@ -1226,6 +1231,16 @@
                     logDebug('Call timed out, auto-rejecting');
                     rejectCall();
                 }, 30000);
+                
+                // Force the notification to be visible after a short delay
+                setTimeout(() => {
+                    if (callNotification.style.display !== 'block') {
+                        logDebug('Forcing notification to be visible');
+                        callNotification.style.display = 'block';
+                        callNotification.style.visibility = 'visible';
+                        callNotification.style.opacity = '1';
+                    }
+                }, 100);
             }
 
             // Play notification sound
@@ -1261,6 +1276,8 @@
             function hideCallNotification() {
                 logDebug('Hiding call notification');
                 callNotification.style.display = 'none';
+                callNotification.style.visibility = 'hidden';
+                callNotification.style.opacity = '0';
                 incomingCallIndicator.style.display = 'none';
                 clearTimeout(callTimeout);
             }
