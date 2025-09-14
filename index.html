@@ -157,7 +157,7 @@
         }
 
         .user-info {
-            font-size: 1px;
+            font-size: 14px;
         }
 
         .messages-container {
@@ -366,7 +366,7 @@
             font-size: 14px;
         }
 
-        /* Video call notification */
+        /* Video call notification - IMPROVED */
         .call-notification {
             position: fixed;
             top: 50%;
@@ -375,19 +375,67 @@
             background-color: white;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.2);
-            z-index: 1000;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            z-index: 9999; /* Very high z-index to ensure it's on top */
             text-align: center;
             max-width: 300px;
+            display: none; /* Hidden by default */
+            border: 2px solid #128C7E;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
         }
 
         .call-notification h3 {
             margin-bottom: 15px;
             color: #128C7E;
+            font-size: 18px;
+        }
+
+        .call-notification p {
+            margin-bottom: 15px;
+            font-size: 16px;
         }
 
         .call-notification .btn {
             margin: 5px;
+            min-width: 80px;
+        }
+
+        .call-notification .btn.accept {
+            background-color: #4CAF50;
+        }
+
+        .call-notification .btn.accept:hover {
+            background-color: #45a049;
+        }
+
+        .call-notification .btn.reject {
+            background-color: #f44336;
+        }
+
+        .call-notification .btn.reject:hover {
+            background-color: #d32f2f;
+        }
+
+        /* Incoming call indicator in chat header */
+        .incoming-call-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background-color: #f44336;
+            border-radius: 50%;
+            margin-left: 10px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
         }
     </style>
 </head>
@@ -401,8 +449,8 @@
     <!-- Screen 1: Landing Page -->
     <div id="screen1" class="screen active">
         <div class="container">
-            <img src="https://assets.ganeshaspeaks.com/wp-content/uploads/2019/09/Lord-Hanuman-750.webp" alt="Chat App" class="app-image">
-            <p>Hanuman Chalisa</p>
+            <img src="https://via.placeholder.com/300" alt="Chat App" class="app-image">
+            <p>Welcome to our real-time chat application! Connect with your friends instantly.</p>
             
             <!-- Hanuman Chalisa -->
             <div class="hanuman-chalisa">
@@ -496,8 +544,8 @@
                 <div><strong>राम लखन सीता सहित, हृदय बसहु सुर भूप।।</strong></div>
             </div>
             
-            <button id="goButton" class="btn">Jai Shree Ram</button>
-            <div id="clickCounter">The End</div>
+            <button id="goButton" class="btn">Go</button>
+            <div id="clickCounter">Clicks: 0/5</div>
         </div>
     </div>
 
@@ -507,7 +555,8 @@
             <h2>Login</h2>
             <div class="login-form">
                 <div class="user-option">
-                    
+                    <button class="user-btn" data-pin="4505">Me (4505)</button>
+                    <button class="user-btn" data-pin="2678">Friend (2678)</button>
                 </div>
                 <input type="password" id="pinInput" placeholder="Enter PIN" maxlength="4">
                 <button id="loginButton" class="btn">Login</button>
@@ -521,7 +570,10 @@
         <div class="chat-container">
             <div class="chat-header">
                 <h2>Chat Room</h2>
-                <div class="user-info">Logged in as: <span id="currentUser"></span></div>
+                <div class="user-info">
+                    Logged in as: <span id="currentUser"></span>
+                    <span id="incomingCallIndicator" class="incoming-call-indicator" style="display: none;"></span>
+                </div>
             </div>
             
             <div id="messagesContainer" class="messages-container"></div>
@@ -563,12 +615,12 @@
     </div>
 
     <!-- Call Notification -->
-    <div id="callNotification" class="call-notification" style="display: none;">
-        <h3>Incoming Video Call</h3>
+    <div id="callNotification" class="call-notification">
+        <h3>📞 Incoming Video Call</h3>
         <p id="callerName">Someone is calling you</p>
         <div>
-            <button id="acceptCallBtn" class="btn">Accept</button>
-            <button id="rejectCallBtn" class="btn">Reject</button>
+            <button id="acceptCallBtn" class="btn accept">Accept</button>
+            <button id="rejectCallBtn" class="btn reject">Reject</button>
         </div>
     </div>
 
@@ -651,6 +703,7 @@
             const muteBtn = document.getElementById('muteBtn');
             const videoBtn = document.getElementById('videoBtn');
             const endCallBtn = document.getElementById('endCallBtn');
+            const incomingCallIndicator = document.getElementById('incomingCallIndicator');
 
             // Check if all elements are found
             const elementsFound = {
@@ -680,7 +733,8 @@
                 callStatusDisplay: !!callStatusDisplay,
                 muteBtn: !!muteBtn,
                 videoBtn: !!videoBtn,
-                endCallBtn: !!endCallBtn
+                endCallBtn: !!endCallBtn,
+                incomingCallIndicator: !!incomingCallIndicator
             };
             
             logDebug('DOM Elements check:');
@@ -703,6 +757,7 @@
             let isMuted = false;
             let isVideoOff = false;
             let isCaller = false;
+            let callTimeout = null;
 
             // STUN/TURN servers
             const iceServers = {
@@ -798,6 +853,7 @@
                                 
                                 // Check if it's a video call invitation
                                 if (payload.new.content.includes('Video call invitation')) {
+                                    logDebug('Video call invitation detected');
                                     showCallNotification();
                                 }
                             }
@@ -1148,27 +1204,97 @@
                 }
             }
 
-            // Show call notification
+            // Show call notification - IMPROVED
             function showCallNotification() {
                 logDebug('Showing call notification');
+                
+                // Show incoming call indicator in chat header
+                incomingCallIndicator.style.display = 'inline-block';
+                
+                // Set caller name
                 callerName.textContent = `${recipient} is calling you`;
+                
+                // Show notification
                 callNotification.style.display = 'block';
+                
+                // Play notification sound (if available)
+                playNotificationSound();
+                
+                // Set timeout to auto-reject after 30 seconds
+                clearTimeout(callTimeout);
+                callTimeout = setTimeout(() => {
+                    logDebug('Call timed out, auto-rejecting');
+                    rejectCall();
+                }, 30000);
+            }
+
+            // Play notification sound
+            function playNotificationSound() {
+                try {
+                    // Create an audio context
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    
+                    // Create an oscillator
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.type = 'sine';
+                    oscillator.frequency.value = 800;
+                    gainNode.gain.value = 0.3;
+                    
+                    // Start the sound
+                    oscillator.start();
+                    
+                    // Stop the sound after 200ms
+                    setTimeout(() => {
+                        oscillator.stop();
+                    }, 200);
+                } catch (error) {
+                    logDebug(`Error playing notification sound: ${error.message}`);
+                }
+            }
+
+            // Hide call notification
+            function hideCallNotification() {
+                logDebug('Hiding call notification');
+                callNotification.style.display = 'none';
+                incomingCallIndicator.style.display = 'none';
+                clearTimeout(callTimeout);
             }
 
             // Accept call
             if (acceptCallBtn) {
                 acceptCallBtn.addEventListener('click', async () => {
                     logDebug('Call accepted');
-                    callNotification.style.display = 'none';
+                    hideCallNotification();
                     await initializeCall(false);
                 });
             }
 
             // Reject call
+            function rejectCall() {
+                logDebug('Call rejected');
+                hideCallNotification();
+                
+                // Send rejection message
+                supabase
+                    .from('messages')
+                    .insert([{ 
+                        sender: currentUser, 
+                        receiver: recipient, 
+                        content: `Call rejected by ${currentUser}` 
+                    }])
+                    .catch(error => {
+                        logDebug(`Error sending rejection message: ${error.message}`);
+                    });
+            }
+
             if (rejectCallBtn) {
                 rejectCallBtn.addEventListener('click', () => {
-                    logDebug('Call rejected');
-                    callNotification.style.display = 'none';
+                    rejectCall();
                 });
             }
 
@@ -1235,6 +1361,9 @@
                 // Reset button icons
                 muteBtn.textContent = '🎤';
                 videoBtn.textContent = '📹';
+                
+                // Hide call indicator
+                incomingCallIndicator.style.display = 'none';
             }
 
             // End call button
